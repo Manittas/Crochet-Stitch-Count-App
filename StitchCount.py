@@ -10,6 +10,7 @@ window = Tk()
 
 window.geometry("300x300")
 window.resizable(False, False)
+window.attributes("-topmost", True)
 
 canvas = Canvas(
     window,
@@ -25,22 +26,28 @@ canvas.pack()
 # row object and related
 
 row = Row()
+manualCount = 0
 
 # functions
 
 def increment_button_click():
     row.increment()
-    canvas.itemconfig(rowLabel, text=f"Count: {row.count}")
-    toggle_decrement_button()
+    update_count()
     
 def decrement_button_click():
     # prevent from going to negative values
     if row.count > 0:
         row.decrement()
-        canvas.itemconfig(rowLabel, text=f"Count: {row.count}")
-        toggle_decrement_button()
+        update_count()
+
+def manual_set_count_click():
+    row.count(manualCount)
+    update_count()
     
-def toggle_decrement_button():
+def update_count():
+    canvas.itemconfig(rowLabel, text=f"Count: {row.count}")
+    
+    # toglles/untoggles decrement button depending on count value update
     if row.count == 0:
         decrementBtn.config(state="disabled")
     else:
@@ -71,6 +78,7 @@ btn_font = font.Font(family="Arial", size=10, weight="bold")
 
 incrementBtn = Button(window, text="Add", font=btn_font, width=4, height=1, command=increment_button_click)
 decrementBtn = Button(window, text="Sub", state="disabled", font=btn_font, width=4, height=1, command=decrement_button_click)
+manualSetBtn = Button(window, text="Set", font=btn_font, width=4, height=1, command=manual_set_count_click)
 
 canvas.create_window(200,
                      175,
