@@ -2,9 +2,13 @@
 # pyinstaller --clean --onefile --noconsole --icon icon.ico your_script.py
 # ------------------------------------------------------------------------
 
-# from pathlib import Path
+from pathlib import Path
 from tkinter import Tk, Canvas, Button, font, Entry, END
 from models.Row import Row
+
+import json
+import sys
+import os
 
 # Window properties
 # -----------------
@@ -25,13 +29,28 @@ canvas = Canvas(
 )
 canvas.pack()
 
-# Objects and variables
-# ---------------------
+# Variables class
+# ---------------
 
 class AppVariables:
     def __init__(self):
         self.inputVisible = False  # toggles the input field to be visible
         self.inputWindow = None    # default store value for canvas window ID
+        self.saveFile = "crochetdata.json"
+        self.savePath = self.get_base_path() / "data"
+    
+    def get_base_path(self):
+        # Returns the base folder whether running as a script or a PyInstaller EXE.
+        if getattr(sys, 'frozen', False):
+            # Running as a PyInstaller EXE
+            base_path = Path(sys.executable).resolve().parent.parent
+        else:
+            # Running from source
+            base_path = Path(__file__).resolve().parent
+        return base_path
+
+# Initialize variables and row
+# ----------------------------
 
 row = Row()
 variables = AppVariables()
@@ -49,6 +68,8 @@ def on_key_press(event):
                 increment_button_click()
             case "r" | "R":
                 reset_count()
+            case "s" | "S":
+                save_current()
             case _:
                 return
 
@@ -82,6 +103,16 @@ def update_count():
         decrementBtn.config(state="disabled")
     else:
         decrementBtn.config(state="normal")
+
+def save_current():
+    try:
+        # creates the data folder in case it doesn't exist
+        variables.savePath.mkdir(exist_ok=True)
+        filePath = variables.savePath / variables.saveFile
+        with open(filePath, "w") as file:
+            json.dump(row.__dict__, file, indent=4)
+    except Exception as e:
+        print("Error:", e)
 
 def toggle_input_field():
     # deletes any value in the field, visibe or not
@@ -128,6 +159,7 @@ validate_cmd = window.register(is_number)
 incrementBtn = Button(window, text="Add", font=btn_font, width=4, height=1, command=increment_button_click)
 decrementBtn = Button(window, text="Sub", state="disabled", font=btn_font, width=4, height=1, command=decrement_button_click)
 manualSetBtn = Button(window, text="Set", font=btn_font, width=4, height=1, command=toggle_input_field)
+saveBtn = Button(window, text="Save", font=btn_font, width=4, height=1, command=save_current)
 
 inputField = Entry(window, validate="key", validatecommand=(validate_cmd, "%P"))
 
@@ -140,6 +172,9 @@ canvas.create_window(150,
 canvas.create_window(100,
                      175,
                      window=decrementBtn)
+canvas.create_window(30,
+                     275,
+                     window=saveBtn)
 
 # App bindings and main loop
 # --------------------------
