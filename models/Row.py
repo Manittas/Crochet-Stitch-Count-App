@@ -1,6 +1,6 @@
 class Row:
-    def __init__(self, count = 0):
-        self._count = count
+    def __init__(self, _count = 0):
+        self._count = _count
         
     # class methods
     

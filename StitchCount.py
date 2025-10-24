@@ -3,7 +3,7 @@
 # ------------------------------------------------------------------------
 
 from pathlib import Path
-from tkinter import Tk, Canvas, Button, font, Entry, END
+from tkinter import Tk, Canvas, Button, Entry, messagebox, font, END
 from models.Row import Row
 
 import json
@@ -48,12 +48,6 @@ class AppVariables:
             # Running from source
             base_path = Path(__file__).resolve().parent
         return base_path
-
-# Initialize variables and row
-# ----------------------------
-
-row = Row()
-variables = AppVariables()
 
 # functions
 # ----------
@@ -112,7 +106,19 @@ def save_current():
         with open(filePath, "w") as file:
             json.dump(row.__dict__, file, indent=4)
     except Exception as e:
-        print("Error:", e)
+        messagebox.showerror("Error", str(e), parent=window)
+
+def load_file():
+    filePath = variables.savePath / variables.saveFile
+    if filePath.exists():
+        try:
+            # opens file, gets data and converts it to row object
+            with open(filePath, "r") as file:
+                data = json.load(file)
+            return Row(**data)
+        except Exception as e:
+            messagebox.showerror("Error", str(e), parent=window)
+    return Row()
 
 def toggle_input_field():
     # deletes any value in the field, visibe or not
@@ -128,6 +134,12 @@ def toggle_input_field():
         
 def is_number(char):
     return char.isdigit() or char == ""
+
+# Initialize variables and row
+# ----------------------------
+
+variables = AppVariables()
+row = load_file()
 
 # labels
 # ------
