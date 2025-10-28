@@ -33,7 +33,7 @@ class Row:
             self._count = value
     
     @isCurrent.setter
-    def rowId(self, isCurrent):
+    def isCurrent(self, isCurrent):
         self._isCurrent = isCurrent
             
     # instance methods

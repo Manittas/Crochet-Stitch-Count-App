@@ -8,7 +8,6 @@ from models.Row import Row
 
 import json
 import sys
-import os
 
 # Window properties
 # -----------------
@@ -34,10 +33,15 @@ canvas.pack()
 
 class AppVariables:
     def __init__(self):
+        # flags
         self.inputVisible = False  # toggles the input field to be visible
         self.inputWindow = None    # default store value for canvas window ID
+        # file
         self.saveFile = "crochetdata.json"
         self.savePath = self.get_base_path() / "data"
+        # objects
+        self.currentIndex = 0
+        self.rowsList = self.load_file()
     
     def get_base_path(self):
         # Returns the base folder whether running as a script or a PyInstaller EXE.
@@ -48,6 +52,40 @@ class AppVariables:
             # Running from source
             base_path = Path(__file__).resolve().parent
         return base_path
+    
+    def load_file(self):
+        filePath = self.savePath / self.saveFile
+        newRowsList = list()
+        if filePath.exists():
+            try:
+                # opens file, gets data and converts it to row object
+                with open(filePath, "r") as file:
+                    data = json.load(file)
+                newRowsList = [Row(**item) for item in data]
+                # finds current active row, saving its list index
+                self.currentIndex = next((i for i, row in enumerate(newRowsList) if row.isCurrent), 0)
+                return newRowsList
+            except Exception as e:
+                messagebox.showerror("Error", str(e), parent=window)
+        # Default case for when file doesn't exist or exception happens
+        # Create empty list with new row set to be the current
+        newRow = Row(_isCurrent=True)
+        newRowsList.append(newRow)
+        self.currentIndex = 0
+        return newRowsList
+    
+    def save_file(self):
+        try:
+            # creates the data folder in case it doesn't exist
+            self.savePath.mkdir(exist_ok=True)
+            filePath = self.savePath / self.saveFile
+            with open(filePath, "w") as file:
+                data = [row.__dict__ for row in self.rowsList]
+                json.dump(data, file, indent=4)
+                # show saved label
+                canvas.itemconfig(saveLabel, state="normal")
+        except Exception as e:
+            messagebox.showerror("Error", str(e), parent=window)
 
 # functions
 # ----------
@@ -62,63 +100,54 @@ def on_key_press(event):
                 increment_button_click()
             case "r" | "R":
                 reset_count()
+            case "n" | "N":
+                new_row()
             case "s" | "S":
-                save_current()
+                variables.save_file()
             case _:
                 return
 
 def increment_button_click():
-    row.increment()
+    variables.rowsList[variables.currentIndex].increment()
     update_count()
     
 def decrement_button_click():
     # prevent from going to negative values
-    if row.count > 0:
-        row.decrement()
+    if variables.rowsList[variables.currentIndex].count > 0:
+        variables.rowsList[variables.currentIndex].decrement()
         update_count()
 
 def input_set_count():
     newCount = inputField.get()
     # verification so it only changes when input is visible and with value
     if variables.inputVisible and not(newCount == ""):
-        row.count = int(newCount)
+        variables.rowsList[variables.currentIndex].count = int(newCount)
         inputField.delete(0, END)
         update_count()
 
 def reset_count():
-    row.count = 0
+    variables.rowsList[variables.currentIndex].count = 0
     update_count()
+
+def new_row():
+    newRow = Row(_isCurrent=True)
+    variables.rowsList[variables.currentIndex].isCurrent = False
+    variables.rowsList.append(newRow)
+    variables.currentIndex = next((i for i, row in enumerate(variables.rowsList) if row.isCurrent), 0)
+    update_count()
+    # make New! tag visible after updating canva
+    canvas.itemconfig(newLabel, state="normal")
     
 def update_count():
-    canvas.itemconfig(rowLabel, text=f"Count: {row.count}")
-    
+    canvas.itemconfig(rowLabel, text=f"Count: {variables.rowsList[variables.currentIndex].count}")
+    # always make New! and Saved! tag invisible at any update
+    canvas.itemconfig(newLabel, state="hidden")
+    canvas.itemconfig(saveLabel, state="hidden")
     # toggles/untoggles decrement button depending on count value update
-    if row.count == 0:
+    if variables.rowsList[variables.currentIndex].count == 0:
         decrementBtn.config(state="disabled")
     else:
         decrementBtn.config(state="normal")
-
-def save_current():
-    try:
-        # creates the data folder in case it doesn't exist
-        variables.savePath.mkdir(exist_ok=True)
-        filePath = variables.savePath / variables.saveFile
-        with open(filePath, "w") as file:
-            json.dump(row.__dict__, file, indent=4)
-    except Exception as e:
-        messagebox.showerror("Error", str(e), parent=window)
-
-def load_file():
-    filePath = variables.savePath / variables.saveFile
-    if filePath.exists():
-        try:
-            # opens file, gets data and converts it to row object
-            with open(filePath, "r") as file:
-                data = json.load(file)
-            return Row(**data)
-        except Exception as e:
-            messagebox.showerror("Error", str(e), parent=window)
-    return Row()
 
 def toggle_input_field():
     # deletes any value in the field, visibe or not
@@ -139,7 +168,6 @@ def is_number(char):
 # ----------------------------
 
 variables = AppVariables()
-row = load_file()
 
 # labels
 # ------
@@ -156,9 +184,23 @@ canvas.create_text(150,
                    fill="white",
                    font=("Arial", 12, "bold"))
 
+saveLabel = canvas.create_text(150,
+                              95,
+                              text="Saved!",
+                              fill="Green",
+                              font=("Arial", 12, "bold", "italic"),
+                              state="hidden")
+
+newLabel = canvas.create_text(105,
+                              50,
+                              text="NEW!",
+                              fill="Yellow",
+                              font=("Arial", 12, "bold"),
+                              state="hidden")
+
 rowLabel = canvas.create_text(150,
                               120,
-                              text=f"Count: {row.count}",
+                              text=f"Count: {variables.rowsList[variables.currentIndex].count}",
                               fill="white",
                               font=("Arial", 16, "bold"))
 
@@ -166,12 +208,14 @@ rowLabel = canvas.create_text(150,
 # ----------------
 
 btn_font = font.Font(family="Arial", size=10, weight="bold")
+initial_decrement_state = "normal" if variables.rowsList[variables.currentIndex].count > 0 else "disabled"
 validate_cmd = window.register(is_number)
 
 incrementBtn = Button(window, text="Add", font=btn_font, width=4, height=1, command=increment_button_click)
-decrementBtn = Button(window, text="Sub", state="disabled", font=btn_font, width=4, height=1, command=decrement_button_click)
+decrementBtn = Button(window, text="Sub", state=initial_decrement_state, font=btn_font, width=4, height=1, command=decrement_button_click)
 manualSetBtn = Button(window, text="Set", font=btn_font, width=4, height=1, command=toggle_input_field)
-saveBtn = Button(window, text="Save", font=btn_font, width=4, height=1, command=save_current)
+saveBtn = Button(window, text="Save", font=btn_font, width=4, height=1, command=variables.save_file)
+newBtn = Button(window, text="New", font=btn_font, width=4, height=1, command=new_row)
 
 inputField = Entry(window, validate="key", validatecommand=(validate_cmd, "%P"))
 
@@ -187,6 +231,9 @@ canvas.create_window(100,
 canvas.create_window(30,
                      275,
                      window=saveBtn)
+canvas.create_window(270,
+                     275,
+                     window=newBtn)
 
 # App bindings and main loop
 # --------------------------
