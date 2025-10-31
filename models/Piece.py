@@ -1,8 +1,9 @@
 import uuid
 
-class Row:
-    def __init__(self, _id = uuid.uuid4().hex, _count = 0, _isCurrent = False):
+class Piece:
+    def __init__(self, _id = uuid.uuid4().hex, _name = "", _count = 0, _isCurrent = False):
         self._id = _id
+        self._name = _name
         self._count = _count
         self._isCurrent = _isCurrent
         
@@ -10,8 +11,12 @@ class Row:
     # -------------
     
     @property
-    def rowId(self):
+    def pieceId(self):
         return self._id
+    
+    @property
+    def name(self):
+        return self._name
     
     @property
     def count(self):
@@ -22,9 +27,13 @@ class Row:
         return self._isCurrent
     
     
-    @rowId.setter
-    def rowId(self, newId):
+    @pieceId.setter
+    def pieceId(self, newId):
         self._id = newId
+    
+    @name.setter
+    def name(self, newName):
+        self._name = newName
             
     @count.setter
     def count(self, value):
