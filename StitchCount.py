@@ -2,17 +2,15 @@
 # pyinstaller --clean --onefile --noconsole --icon icon.ico your_script.py
 # ------------------------------------------------------------------------
 
-from pathlib import Path
-from tkinter import Tk, Canvas, Button, Entry, messagebox, font, END
+from tkinter import Tk, Canvas, Button, Entry, font, END
 from models.Piece import Piece
-
-import json
-import sys
+from utils.AppVariables import AppVariables
 
 # Window properties
 # -----------------
 
 window = Tk()
+window.title("Stich Counter")
 window.geometry("300x300")
 window.resizable(False, False)
 window.attributes("-topmost", True)
@@ -27,65 +25,6 @@ canvas = Canvas(
     relief = "ridge"
 )
 canvas.pack()
-
-# Variables class
-# ---------------
-
-class AppVariables:
-    def __init__(self):
-        # flags
-        self.inputVisible = False  # toggles the input field to be visible
-        self.inputWindow = None    # default store value for canvas window ID
-        # file
-        self.saveFile = "crochetdata.json"
-        self.savePath = self.get_base_path() / "data"
-        # objects
-        self.currentIndex = 0
-        self.piecesList = self.load_file()
-    
-    def get_base_path(self):
-        # Returns the base folder whether running as a script or a PyInstaller EXE.
-        if getattr(sys, 'frozen', False):
-            # Running as a PyInstaller EXE
-            base_path = Path(sys.executable).resolve().parent.parent
-        else:
-            # Running from source
-            base_path = Path(__file__).resolve().parent
-        return base_path
-    
-    def load_file(self):
-        filePath = self.savePath / self.saveFile
-        newPiecesList = list()
-        if filePath.exists():
-            try:
-                # opens file, gets data and converts it to piece object
-                with open(filePath, "r") as file:
-                    data = json.load(file)
-                newPiecesList = [Piece(**item) for item in data]
-                # finds current active piece, saving its list index
-                self.currentIndex = next((i for i, piece in enumerate(newPiecesList) if piece.isCurrent), 0)
-                return newPiecesList
-            except Exception as e:
-                messagebox.showerror("Error", str(e), parent=window)
-        # Default case for when file doesn't exist or exception happens
-        # Create empty list with new piece set to be the current
-        newPiece = Piece(_isCurrent=True)
-        newPiecesList.append(newPiece)
-        self.currentIndex = 0
-        return newPiecesList
-    
-    def save_file(self):
-        try:
-            # creates the data folder in case it doesn't exist
-            self.savePath.mkdir(exist_ok=True)
-            filePath = self.savePath / self.saveFile
-            with open(filePath, "w") as file:
-                data = [piece.__dict__ for piece in self.piecesList]
-                json.dump(data, file, indent=4)
-                # show saved label
-                canvas.itemconfig(saveLabel, state="normal")
-        except Exception as e:
-            messagebox.showerror("Error", str(e), parent=window)
 
 # functions
 # ----------
@@ -135,8 +74,9 @@ def new_piece():
     variables.piecesList.append(newPiece)
     variables.currentIndex = next((i for i, piece in enumerate(variables.piecesList) if piece.isCurrent), 0)
     update_count()
-    # make New! tag visible after updating canva
+    # make New! tag visible after updating canva and set new name
     canvas.itemconfig(newLabel, state="normal")
+    canvas.itemconfig(pieceName, text=f"{variables.piecesList[variables.currentIndex].name}")
     
 def update_count():
     canvas.itemconfig(pieceLabel, text=f"Row Count: {variables.piecesList[variables.currentIndex].count}")
@@ -164,22 +104,11 @@ def toggle_input_field():
 def is_number(char):
     return char.isdigit() or char == ""
 
-# Initialize variables and piece
-# ----------------------------
-
-variables = AppVariables()
-
 # labels
 # ------
 
 canvas.create_text(150,
                    20,
-                   text="Stich Counting App",
-                   fill="white",
-                   font=("Arial", 12))
-
-canvas.create_text(150,
-                   50,
                    text="Piece",
                    fill="white",
                    font=("Arial", 12, "bold"))
@@ -192,11 +121,25 @@ saveLabel = canvas.create_text(150,
                               state="hidden")
 
 newLabel = canvas.create_text(102,
-                              50,
+                              20,
                               text="NEW!",
                               fill="Yellow",
                               font=("Arial", 12, "bold"),
                               state="hidden")
+
+# Initialize variables and piece
+# ----------------------------
+
+variables = AppVariables(window, canvas, saveLabel)
+
+# labels dependent on variables
+# -----------------------------
+
+pieceName = canvas.create_text(150,
+                              45,
+                              text=f"{variables.piecesList[variables.currentIndex].name}",
+                              fill="white",
+                              font=("Arial", 12))
 
 pieceLabel = canvas.create_text(150,
                               120,

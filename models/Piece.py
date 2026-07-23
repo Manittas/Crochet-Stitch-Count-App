@@ -1,7 +1,7 @@
 import uuid
 
 class Piece:
-    def __init__(self, _id = uuid.uuid4().hex, _name = "", _count = 0, _isCurrent = False):
+    def __init__(self, _id = uuid.uuid4().hex, _name = "piece", _count = 0, _isCurrent = False):
         self._id = _id
         self._name = _name
         self._count = _count
