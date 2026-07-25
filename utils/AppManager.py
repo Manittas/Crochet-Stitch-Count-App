@@ -22,7 +22,7 @@ class AppManager:
         self.canvas = _canvas
         self.saveLabel = _saveLabel
         
-    def newPiece(self, name = "piece"):
+    def newPiece(self, name):
         newPiece = Piece(_name = name, _isCurrent=True)
         newPiece.name = self.get_unique_name(name)
         return newPiece

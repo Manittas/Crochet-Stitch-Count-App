@@ -2,7 +2,7 @@
 # pyinstaller --clean --onefile --noconsole --icon icon.ico your_script.py
 # ------------------------------------------------------------------------
 
-from tkinter import Tk, Canvas, Button, Entry, font, END
+from tkinter import Tk, Canvas, Button, Entry, Toplevel, font, END
 from utils.AppManager import AppManager
 
 # Window properties
@@ -39,7 +39,7 @@ def on_key_press(event):
             case "r" | "R":
                 reset_count()
             case "n" | "N":
-                new_piece()
+                open_new_piece_popup()
             case "s" | "S":
                 manager.save_file()
             case _:
@@ -66,9 +66,45 @@ def input_set_count():
 def reset_count():
     manager.piecesList[manager.currentIndex].count = 0
     update_count()
+    
+def open_new_piece_popup():
+    popup = Toplevel(window)
+    popup.title("New Piece Name")
+    popup_width = 200
+    popup_height = 100
+    # get relative positioning of the main window
+    window.update_idletasks()
+    main_x = window.winfo_x()
+    main_y = window.winfo_y()
+    main_width = window.winfo_width()
+    main_height = window.winfo_height()
+    # Center the popup over the main window
+    x = main_x + (main_width - popup_width) // 2
+    y = main_y + (main_height - popup_height) // 2
+    popup.geometry(f"{popup_width}x{popup_height}+{x}+{y}")
+    popup.resizable(False, False)
+    # Make it modal
+    popup.transient(window)
+    popup.grab_set()
+    # input
+    nameInput = Entry(popup, width=30)
+    nameInput.pack()
+    # build ok button
+    Button(
+        popup,
+        text="OK",
+        command=lambda: new_piece(nameInput, popup)
+    ).pack(pady=15)
+    # Allow pressing Enter
+    nameInput.bind("<Return>", lambda e: new_piece(nameInput, popup))
+    # Put the cursor in the input immediately
+    nameInput.focus_set()
+    # Wait until popup is closed
+    window.wait_window(popup)
 
-def new_piece():
-    newPiece = manager.newPiece()
+def new_piece(inputEntry, popup):
+    name = inputEntry.get()
+    newPiece = manager.newPiece(name = name if name else "piece")
     manager.piecesList[manager.currentIndex].isCurrent = False
     manager.piecesList.append(newPiece)
     manager.currentIndex = next((i for i, piece in enumerate(manager.piecesList) if piece.isCurrent), 0)
@@ -76,6 +112,8 @@ def new_piece():
     # make New! tag visible after updating canva and set new name
     canvas.itemconfig(newLabel, state="normal")
     canvas.itemconfig(pieceName, text=f"{manager.piecesList[manager.currentIndex].name}")
+    # destroy popup and input
+    popup.destroy()
     
 def update_count():
     canvas.itemconfig(pieceLabel, text=f"Row Count: {manager.piecesList[manager.currentIndex].count}")
@@ -157,7 +195,7 @@ incrementBtn = Button(window, text="Add", font=btn_font, width=4, height=1, comm
 decrementBtn = Button(window, text="Sub", state=initial_decrement_state, font=btn_font, width=4, height=1, command=decrement_button_click)
 manualSetBtn = Button(window, text="Set", font=btn_font, width=4, height=1, command=toggle_input_field)
 saveBtn = Button(window, text="Save", font=btn_font, width=4, height=1, command=manager.save_file)
-newBtn = Button(window, text="New", font=btn_font, width=4, height=1, command=new_piece)
+newBtn = Button(window, text="New", font=btn_font, width=4, height=1, command=open_new_piece_popup)
 
 inputField = Entry(window, validate="key", validatecommand=(validate_cmd, "%P"))
 
