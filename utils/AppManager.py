@@ -4,8 +4,9 @@ from models.Piece import Piece
 
 import json
 import sys
+import re
 
-class AppVariables:
+class AppManager:
     def __init__(self, _window, _canvas, _saveLabel):
         # flags
         self.inputVisible = False  # toggles the input field to be visible
@@ -20,6 +21,23 @@ class AppVariables:
         self.window = _window
         self.canvas = _canvas
         self.saveLabel = _saveLabel
+        
+    def newPiece(self, name = "piece"):
+        newPiece = Piece(_name = name, _isCurrent=True)
+        newPiece.name = self.get_unique_name(name)
+        return newPiece
+    
+    def get_unique_name(self, name):
+        # Remove any existing " (number)" suffix
+        base_name = re.sub(r" \(\d+\)$", "", name)
+        used_names = {piece.name for piece in self.piecesList}
+        if base_name not in used_names:
+            return base_name
+        # checks which increment number to add to the name
+        i = 2
+        while f"{base_name} ({i})" in used_names:
+            i += 1
+        return f"{base_name} ({i})"
     
     def get_base_path(self):
         # Returns the base folder whether running as a script or a PyInstaller EXE.
