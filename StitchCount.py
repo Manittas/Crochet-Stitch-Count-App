@@ -66,7 +66,55 @@ def input_set_count():
 def reset_count():
     manager.rowsList[manager.currentIndex].count = 0
     update_count()
+
+def new_row(inputEntry, popup):
+    name = inputEntry.get()
+    manager.new_row(name = name if name else "row")
+    # update visible objects
+    update_row_name()
+    update_count()
+    # make New! tag visible after updating canva and set new name
+    canvas.itemconfig(newLabel, state="normal")
+    # destroy popup and input
+    popup.grab_release()
+    popup.destroy()
     
+def update_count():
+    if not manager.has_rows():
+        return
+    row = manager.rowsList[manager.currentIndex]
+    canvas.itemconfig(rowLabel, text=f"Stitch Count: {row.count}")
+    # always make New! and Saved! tag invisible at any update
+    canvas.itemconfig(newLabel, state="hidden")
+    canvas.itemconfig(saveLabel, state="hidden")
+    # toggles/untoggles decrement button depending on count value update
+    if decrementBtn is not None:
+        decrementBtn.config(state="normal" if row.count > 0 else "disabled")
+
+def update_row_name():
+    if not manager.has_rows():
+        return
+    row = manager.rowsList[manager.currentIndex]
+    canvas.itemconfig(rowName, text=row.name)
+
+def toggle_input_field():
+    # deletes any value in the field, visibe or not
+    inputField.delete(0, END)
+    # creates / destroys the input field to be visible
+    if manager.inputVisible:
+        manager.inputVisible = False
+        canvas.delete(manager.inputWindow)
+        manager.inputWindow = None
+    else:
+        manager.inputVisible = True
+        manager.inputWindow = canvas.create_window(150, 210, window=inputField)
+        
+def is_number(char):
+    return char.isdigit() or char == ""
+
+# Popup methods
+# -------------
+
 def open_new_row_popup():
     popup = Toplevel(window)
     popup.title("New Row Name")
@@ -86,6 +134,10 @@ def open_new_row_popup():
     # Make it modal
     popup.transient(window)
     popup.grab_set()
+    # put it on top always
+    popup.attributes("-topmost", True)
+    popup.lift()
+    popup.focus_force()
     # input
     nameInput = Entry(popup, width=30)
     nameInput.pack()
@@ -101,45 +153,6 @@ def open_new_row_popup():
     nameInput.focus_set()
     # Wait until popup is closed
     window.wait_window(popup)
-
-def new_row(inputEntry, popup):
-    name = inputEntry.get()
-    newRow = manager.new_row(name = name if name else "row")
-    manager.rowsList[manager.currentIndex].isCurrent = False
-    manager.rowsList.append(newRow)
-    manager.currentIndex = next((i for i, row in enumerate(manager.rowsList) if row.isCurrent), 0)
-    update_count()
-    # make New! tag visible after updating canva and set new name
-    canvas.itemconfig(newLabel, state="normal")
-    canvas.itemconfig(rowName, text=f"{manager.rowsList[manager.currentIndex].name}")
-    # destroy popup and input
-    popup.destroy()
-    
-def update_count():
-    canvas.itemconfig(rowLabel, text=f"Stitch Count: {manager.rowsList[manager.currentIndex].count}")
-    # always make New! and Saved! tag invisible at any update
-    canvas.itemconfig(newLabel, state="hidden")
-    canvas.itemconfig(saveLabel, state="hidden")
-    # toggles/untoggles decrement button depending on count value update
-    if manager.rowsList[manager.currentIndex].count == 0:
-        decrementBtn.config(state="disabled")
-    else:
-        decrementBtn.config(state="normal")
-
-def toggle_input_field():
-    # deletes any value in the field, visibe or not
-    inputField.delete(0, END)
-    # creates / destroys the input field to be visible
-    if manager.inputVisible:
-        manager.inputVisible = False
-        canvas.delete(manager.inputWindow)
-        manager.inputWindow = None
-    else:
-        manager.inputVisible = True
-        manager.inputWindow = canvas.create_window(150, 210, window=inputField)
-        
-def is_number(char):
-    return char.isdigit() or char == ""
 
 # labels
 # ------
@@ -164,31 +177,51 @@ newLabel = canvas.create_text(102,
                               font=("Arial", 12, "bold"),
                               state="hidden")
 
-# Initialize variables and row
-# ----------------------------
-
-manager = AppManager(window, canvas, saveLabel)
-
 # labels dependent on variables
 # -----------------------------
 
 rowName = canvas.create_text(150,
                               45,
-                              text=f"{manager.rowsList[manager.currentIndex].name}",
+                              text="",
                               fill="white",
                               font=("Arial", 12))
 
 rowLabel = canvas.create_text(150,
                               120,
-                              text=f"Stitch Count: {manager.rowsList[manager.currentIndex].count}",
+                              text="",
                               fill="white",
                               font=("Arial", 16, "bold"))
+
+btn_font = None
+initial_decrement_state = None
+validate_cmd = None
+incrementBtn = None
+decrementBtn = None
+manualSetBtn = None
+saveBtn = None
+newBtn = None
+inputField = None
+
+# Initialize variables and row
+# ----------------------------
+
+manager = AppManager(window, canvas, saveLabel)
+
+if not manager.has_rows():
+    # to run after mainloop of the window is created, prevents first popup not closing
+    window.after(0, open_new_row_popup)
+else:
+    update_row_name()
+    update_count()
 
 # buttons & Inputs
 # ----------------
 
 btn_font = font.Font(family="Arial", size=10, weight="bold")
-initial_decrement_state = "normal" if manager.rowsList[manager.currentIndex].count > 0 else "disabled"
+if manager.has_rows():
+    initial_decrement_state = ("normal" if manager.rowsList[manager.currentIndex].count > 0 else "disabled")
+else:
+    initial_decrement_state = "disabled"
 validate_cmd = window.register(is_number)
 
 incrementBtn = Button(window, text="Add", font=btn_font, width=4, height=1, command=increment_button_click)

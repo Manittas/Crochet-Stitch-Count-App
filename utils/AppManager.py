@@ -11,21 +11,31 @@ class AppManager:
         # flags
         self.inputVisible = False  # toggles the input field to be visible
         self.inputWindow = None    # default store value for canvas window ID
+        # window objects
+        self.window = _window
+        self.canvas = _canvas
+        self.saveLabel = _saveLabel
         # file
         self.saveFile = "crochetdata.json"
         self.savePath = self.get_base_path() / "data"
         # objects
         self.currentIndex = 0
         self.rowsList = self.load_file()
-        # window objects
-        self.window = _window
-        self.canvas = _canvas
-        self.saveLabel = _saveLabel
+    
+    ###################################################
+    
+    def has_rows(self):
+        return len(self.rowsList) > 0
         
     def new_row(self, name):
         newRow = Row(_name = name, _isCurrent=True)
         newRow.name = self.get_unique_name(name)
-        return newRow
+        # If there is already a current row, unset it
+        if self.has_rows():
+            self.rowsList[self.currentIndex].isCurrent = False
+        # append and update
+        self.rowsList.append(newRow)
+        self.currentIndex = len(self.rowsList) - 1
     
     def get_unique_name(self, name):
         # Remove any existing " (number)" suffix
@@ -65,10 +75,8 @@ class AppManager:
                 messagebox.showerror("Error", str(e), parent=self.window)
         # Default case for when file doesn't exist or exception happens
         # Create empty list with new row set to be the current
-        newRow = Row(_isCurrent=True)
-        newRowsList.append(newRow)
         self.currentIndex = 0
-        return newRowsList
+        return []
     
     def save_file(self):
         try:
@@ -76,7 +84,7 @@ class AppManager:
             self.savePath.mkdir(exist_ok=True)
             filePath = self.savePath / self.saveFile
             with open(filePath, "w") as file:
-                data = [row.__dict__ for row in self.RowsList]
+                data = [row.__dict__ for row in self.rowsList]
                 json.dump(data, file, indent=4)
                 # show saved label
                 self.canvas.itemconfig(self.saveLabel, state="normal")
