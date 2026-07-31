@@ -115,7 +115,7 @@ def is_number(char):
 # Popup methods
 # -------------
 
-def open_new_row_popup():
+def open_new_row_popup(is_startup = False):
     popup = Toplevel(window)
     popup.title("New Row Name")
     popup_width = 200
@@ -153,6 +153,9 @@ def open_new_row_popup():
     nameInput.focus_set()
     # Wait until popup is closed
     window.wait_window(popup)
+    # Popup closed and no row added on open if no save file closes app
+    if is_startup and not manager.has_rows():
+        window.destroy()
 
 # labels
 # ------
@@ -209,7 +212,7 @@ manager = AppManager(window, canvas, saveLabel)
 
 if not manager.has_rows():
     # to run after mainloop of the window is created, prevents first popup not closing
-    window.after(0, open_new_row_popup)
+    window.after(0, lambda: open_new_row_popup(True))
 else:
     update_row_name()
     update_count()
