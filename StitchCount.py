@@ -39,37 +39,37 @@ def on_key_press(event):
             case "r" | "R":
                 reset_count()
             case "n" | "N":
-                open_new_piece_popup()
+                open_new_row_popup()
             case "s" | "S":
                 manager.save_file()
             case _:
                 return
 
 def increment_button_click():
-    manager.piecesList[manager.currentIndex].increment()
+    manager.rowsList[manager.currentIndex].increment()
     update_count()
     
 def decrement_button_click():
     # prevent from going to negative values
-    if manager.piecesList[manager.currentIndex].count > 0:
-        manager.piecesList[manager.currentIndex].decrement()
+    if manager.rowsList[manager.currentIndex].count > 0:
+        manager.rowsList[manager.currentIndex].decrement()
         update_count()
 
 def input_set_count():
     newCount = inputField.get()
     # verification so it only changes when input is visible and with value
     if manager.inputVisible and not(newCount == ""):
-        manager.piecesList[manager.currentIndex].count = int(newCount)
+        manager.rowsList[manager.currentIndex].count = int(newCount)
         inputField.delete(0, END)
         update_count()
 
 def reset_count():
-    manager.piecesList[manager.currentIndex].count = 0
+    manager.rowsList[manager.currentIndex].count = 0
     update_count()
     
-def open_new_piece_popup():
+def open_new_row_popup():
     popup = Toplevel(window)
-    popup.title("New Piece Name")
+    popup.title("New Row Name")
     popup_width = 200
     popup_height = 100
     # get relative positioning of the main window
@@ -93,35 +93,35 @@ def open_new_piece_popup():
     Button(
         popup,
         text="OK",
-        command=lambda: new_piece(nameInput, popup)
+        command=lambda: new_row(nameInput, popup)
     ).pack(pady=15)
     # Allow pressing Enter
-    nameInput.bind("<Return>", lambda e: new_piece(nameInput, popup))
+    nameInput.bind("<Return>", lambda e: new_row(nameInput, popup))
     # Put the cursor in the input immediately
     nameInput.focus_set()
     # Wait until popup is closed
     window.wait_window(popup)
 
-def new_piece(inputEntry, popup):
+def new_row(inputEntry, popup):
     name = inputEntry.get()
-    newPiece = manager.newPiece(name = name if name else "piece")
-    manager.piecesList[manager.currentIndex].isCurrent = False
-    manager.piecesList.append(newPiece)
-    manager.currentIndex = next((i for i, piece in enumerate(manager.piecesList) if piece.isCurrent), 0)
+    newRow = manager.new_row(name = name if name else "row")
+    manager.rowsList[manager.currentIndex].isCurrent = False
+    manager.rowsList.append(newRow)
+    manager.currentIndex = next((i for i, row in enumerate(manager.rowsList) if row.isCurrent), 0)
     update_count()
     # make New! tag visible after updating canva and set new name
     canvas.itemconfig(newLabel, state="normal")
-    canvas.itemconfig(pieceName, text=f"{manager.piecesList[manager.currentIndex].name}")
+    canvas.itemconfig(rowName, text=f"{manager.rowsList[manager.currentIndex].name}")
     # destroy popup and input
     popup.destroy()
     
 def update_count():
-    canvas.itemconfig(pieceLabel, text=f"Row Count: {manager.piecesList[manager.currentIndex].count}")
+    canvas.itemconfig(rowLabel, text=f"Stitch Count: {manager.rowsList[manager.currentIndex].count}")
     # always make New! and Saved! tag invisible at any update
     canvas.itemconfig(newLabel, state="hidden")
     canvas.itemconfig(saveLabel, state="hidden")
     # toggles/untoggles decrement button depending on count value update
-    if manager.piecesList[manager.currentIndex].count == 0:
+    if manager.rowsList[manager.currentIndex].count == 0:
         decrementBtn.config(state="disabled")
     else:
         decrementBtn.config(state="normal")
@@ -146,7 +146,7 @@ def is_number(char):
 
 canvas.create_text(150,
                    20,
-                   text="Piece",
+                   text="Row",
                    fill="white",
                    font=("Arial", 12, "bold"))
 
@@ -164,7 +164,7 @@ newLabel = canvas.create_text(102,
                               font=("Arial", 12, "bold"),
                               state="hidden")
 
-# Initialize variables and piece
+# Initialize variables and row
 # ----------------------------
 
 manager = AppManager(window, canvas, saveLabel)
@@ -172,15 +172,15 @@ manager = AppManager(window, canvas, saveLabel)
 # labels dependent on variables
 # -----------------------------
 
-pieceName = canvas.create_text(150,
+rowName = canvas.create_text(150,
                               45,
-                              text=f"{manager.piecesList[manager.currentIndex].name}",
+                              text=f"{manager.rowsList[manager.currentIndex].name}",
                               fill="white",
                               font=("Arial", 12))
 
-pieceLabel = canvas.create_text(150,
+rowLabel = canvas.create_text(150,
                               120,
-                              text=f"Row Count: {manager.piecesList[manager.currentIndex].count}",
+                              text=f"Stitch Count: {manager.rowsList[manager.currentIndex].count}",
                               fill="white",
                               font=("Arial", 16, "bold"))
 
@@ -188,14 +188,14 @@ pieceLabel = canvas.create_text(150,
 # ----------------
 
 btn_font = font.Font(family="Arial", size=10, weight="bold")
-initial_decrement_state = "normal" if manager.piecesList[manager.currentIndex].count > 0 else "disabled"
+initial_decrement_state = "normal" if manager.rowsList[manager.currentIndex].count > 0 else "disabled"
 validate_cmd = window.register(is_number)
 
 incrementBtn = Button(window, text="Add", font=btn_font, width=4, height=1, command=increment_button_click)
 decrementBtn = Button(window, text="Sub", state=initial_decrement_state, font=btn_font, width=4, height=1, command=decrement_button_click)
 manualSetBtn = Button(window, text="Set", font=btn_font, width=4, height=1, command=toggle_input_field)
 saveBtn = Button(window, text="Save", font=btn_font, width=4, height=1, command=manager.save_file)
-newBtn = Button(window, text="New", font=btn_font, width=4, height=1, command=open_new_piece_popup)
+newBtn = Button(window, text="New", font=btn_font, width=4, height=1, command=open_new_row_popup)
 
 inputField = Entry(window, validate="key", validatecommand=(validate_cmd, "%P"))
 

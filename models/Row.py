@@ -1,6 +1,6 @@
 import uuid
 
-class Piece:
+class Row:
     def __init__(self, _name, _id = uuid.uuid4().hex, _count = 0, _isCurrent = False):
         self._id = _id
         self._name = _name
@@ -11,7 +11,7 @@ class Piece:
     # -------------
     
     @property
-    def pieceId(self):
+    def rowId(self):
         return self._id
     
     @property
@@ -27,8 +27,8 @@ class Piece:
         return self._isCurrent
     
     
-    @pieceId.setter
-    def pieceId(self, newId):
+    @rowId.setter
+    def rowId(self, newId):
         self._id = newId
     
     @name.setter
