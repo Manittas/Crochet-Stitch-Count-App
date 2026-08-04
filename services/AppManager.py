@@ -1,15 +1,15 @@
 from pathlib import Path
-from datetime import datetime
 from tkinter import messagebox
 from models.Row import Row
 
 import json
 import sys
 import re
-import traceback
 
 class AppManager:
-    def __init__(self, _window, _canvas, _saveLabel):
+    def __init__(self, _window, _canvas, _saveLabel, _logger):
+        # logger
+        self.logger = _logger
         # flags
         self.inputVisible = False  # toggles the input field to be visible
         self.inputWindow = None    # default store value for canvas window ID
@@ -74,7 +74,7 @@ class AppManager:
                 self.currentIndex = next((i for i, row in enumerate(newRowsList) if row.isCurrent), 0)
                 return newRowsList
             except Exception:
-                self.log_exception()
+                self.logger.log_exception()
                 messagebox.showerror("Error", "Error loading data.", parent=self.window)
         # Default case for when file doesn't exist or exception happens
         # Create empty list with new row set to be the current
@@ -92,21 +92,5 @@ class AppManager:
                 # show saved label
                 self.canvas.itemconfig(self.saveLabel, state="normal")
         except Exception:
-            self.log_exception()
+            self.logger.log_exception()
             messagebox.showerror("Error", "Error saving data.", parent=self.window)
-    
-    def log_exception(self, exc_info=None):
-        # Create logs folder if it doesn't exist
-        log_path = self.get_base_path() / "logs"
-        log_path.mkdir(exist_ok=True)
-        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        file_path = log_path / f"error_log_{timestamp}.txt"
-        # handled vs unhandled error
-        if exc_info is None:
-            log = traceback.format_exc()
-        else:
-            log = "".join(traceback.format_exception(*exc_info))
-        # Save the full traceback
-        with open(file_path, "w", encoding="utf-8") as file:
-            file.write(log)
-        return file_path

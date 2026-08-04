@@ -3,9 +3,19 @@
 # ------------------------------------------------------------------------
 
 from tkinter import Tk, Canvas, Button, Entry, Toplevel, font, END
-from utils.AppManager import AppManager
+from services.AppManager import AppManager
+from services.LogService import LogService
 
 import sys
+
+# exception handling
+# ------------------
+
+def handle_unhandled_exception(exc_type, exc_value, exc_traceback):
+    logger.log_exception(exc_info=(exc_type, exc_value, exc_traceback))
+
+logger = LogService()
+sys.excepthook = handle_unhandled_exception
 
 # Window properties
 # -----------------
@@ -158,12 +168,6 @@ def open_new_row_popup(is_startup = False):
     # Popup closed and no row added on open if no save file closes app
     if is_startup and not manager.has_rows():
         window.destroy()
-        
-# exception handling
-# ------------------
-
-def handle_unhandled_exception(exc_type, exc_value, exc_traceback):
-    manager.log_exception(exc_info=(exc_type, exc_value, exc_traceback))
 
 # labels
 # ------
@@ -213,11 +217,10 @@ saveBtn = None
 newBtn = None
 inputField = None
 
-# Initialize variables, row, get data and set unhandled exceptions handler log
-# ----------------------------------------------------------------------------
+# Initialize variables, row and data
+# ----------------------------------
 
-manager = AppManager(window, canvas, saveLabel)
-sys.excepthook = handle_unhandled_exception
+manager = AppManager(window, canvas, saveLabel, logger)
 
 if not manager.has_rows():
     # to run after mainloop of the window is created, prevents first popup not closing
