@@ -5,6 +5,7 @@
 from tkinter import Tk, Canvas, Button, Entry, Toplevel, font, END
 from services.AppManager import AppManager
 from services.LogService import LogService
+from services.StorageService import StorageService
 
 import sys
 
@@ -53,7 +54,7 @@ def on_key_press(event):
             case "n" | "N":
                 open_new_row_popup()
             case "s" | "S":
-                manager.save_file()
+                save()
             case _:
                 return
 
@@ -123,6 +124,12 @@ def toggle_input_field():
         
 def is_number(char):
     return char.isdigit() or char == ""
+
+def save():
+    statusOK = storageService.save_rows(manager.rowsList)
+    if statusOK:
+        # show saved label
+        canvas.itemconfig(saveLabel, state="normal")
 
 # Popup methods
 # -------------
@@ -217,10 +224,11 @@ saveBtn = None
 newBtn = None
 inputField = None
 
-# Initialize variables, row and data
-# ----------------------------------
+# Initialize variables and services
+# ---------------------------------
 
-manager = AppManager(window, canvas, saveLabel, logger)
+storageService = StorageService(logger, window)
+manager = AppManager(storageService)
 
 if not manager.has_rows():
     # to run after mainloop of the window is created, prevents first popup not closing
@@ -242,7 +250,7 @@ validate_cmd = window.register(is_number)
 incrementBtn = Button(window, text="Add", font=btn_font, width=4, height=1, command=increment_button_click)
 decrementBtn = Button(window, text="Sub", state=initial_decrement_state, font=btn_font, width=4, height=1, command=decrement_button_click)
 manualSetBtn = Button(window, text="Set", font=btn_font, width=4, height=1, command=toggle_input_field)
-saveBtn = Button(window, text="Save", font=btn_font, width=4, height=1, command=manager.save_file)
+saveBtn = Button(window, text="Save", font=btn_font, width=4, height=1, command=save)
 newBtn = Button(window, text="New", font=btn_font, width=4, height=1, command=open_new_row_popup)
 
 inputField = Entry(window, validate="key", validatecommand=(validate_cmd, "%P"))

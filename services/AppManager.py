@@ -1,30 +1,30 @@
-from pathlib import Path
-from tkinter import messagebox
 from models.Row import Row
 
-import json
-import sys
 import re
 
 class AppManager:
-    def __init__(self, _window, _canvas, _saveLabel, _logger):
-        # logger
-        self.logger = _logger
+    def __init__(self, _storageService):
+        self.storageService = _storageService
         # flags
         self.inputVisible = False  # toggles the input field to be visible
         self.inputWindow = None    # default store value for canvas window ID
-        # window objects
-        self.window = _window
-        self.canvas = _canvas
-        self.saveLabel = _saveLabel
-        # file
-        self.saveFile = "crochetdata.json"
-        self.savePath = self.get_base_path() / "data"
         # objects
         self.currentIndex = 0
-        self.rowsList = self.load_file()
+        self.rowsList = []
+        # load data
+        self.load()
     
     ###################################################
+    
+    def load(self):
+        if self.storageService is None:
+            return
+        data = self.storageService.load_rows()
+        if data is None:
+            return
+        # sets list and finds current active row, saving its list index
+        self.rowsList = [Row(**item) for item in data]
+        self.currentIndex = next((i for i, row in enumerate(self.rowsList) if row.isCurrent), 0)
     
     def has_rows(self):
         return len(self.rowsList) > 0
@@ -50,47 +50,3 @@ class AppManager:
         while f"{base_name} ({i})" in used_names:
             i += 1
         return f"{base_name} ({i})"
-    
-    def get_base_path(self):
-        # Returns the base folder whether running as a script or a PyInstaller EXE.
-        if getattr(sys, 'frozen', False):
-            # Running as a PyInstaller EXE
-            base_path = Path(sys.executable).resolve().parent.parent
-        else:
-            # Running from source
-            base_path = Path(__file__).resolve().parent
-        return base_path
-    
-    def load_file(self):
-        filePath = self.savePath / self.saveFile
-        newRowsList = list()
-        if filePath.exists():
-            try:
-                # opens file, gets data and converts it to row object
-                with open(filePath, "r") as file:
-                    data = json.load(file)
-                newRowsList = [Row(**item) for item in data]
-                # finds current active row, saving its list index
-                self.currentIndex = next((i for i, row in enumerate(newRowsList) if row.isCurrent), 0)
-                return newRowsList
-            except Exception:
-                self.logger.log_exception()
-                messagebox.showerror("Error", "Error loading data.", parent=self.window)
-        # Default case for when file doesn't exist or exception happens
-        # Create empty list with new row set to be the current
-        self.currentIndex = 0
-        return []
-    
-    def save_file(self):
-        try:
-            # creates the data folder in case it doesn't exist
-            self.savePath.mkdir(exist_ok=True)
-            filePath = self.savePath / self.saveFile
-            with open(filePath, "w") as file:
-                data = [row.__dict__ for row in self.rowsList]
-                json.dump(data, file, indent=4)
-                # show saved label
-                self.canvas.itemconfig(self.saveLabel, state="normal")
-        except Exception:
-            self.logger.log_exception()
-            messagebox.showerror("Error", "Error saving data.", parent=self.window)

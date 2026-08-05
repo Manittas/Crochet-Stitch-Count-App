@@ -1,24 +1,13 @@
-from pathlib import Path
 from datetime import datetime
+from utils.Helpers import GetBasePath
 
-import sys
 import traceback
 
 class LogService:
     def __init__(self):
-        self.logPath = self.get_base_path() / "logs"
+        self.logPath = GetBasePath() / "logs"
     
     ###################################################
-    
-    def get_base_path(self):
-        # Returns the base folder whether running as a script or a PyInstaller EXE.
-        if getattr(sys, 'frozen', False):
-            # Running as a PyInstaller EXE
-            base_path = Path(sys.executable).resolve().parent.parent
-        else:
-            # Running from source
-            base_path = Path(__file__).resolve().parent
-        return base_path
     
     def log_exception(self, exc_info=None):
         # Create logs folder if it doesn't exist
