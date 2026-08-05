@@ -6,6 +6,7 @@ from tkinter import Tk, Canvas, Button, Entry, Toplevel, font, END
 from services.AppManager import AppManager
 from services.LogService import LogService
 from services.StorageService import StorageService
+from ui.PopupDialog import PopupDialog
 from utils.Helpers import IsNumber
 
 import sys
@@ -56,6 +57,8 @@ def on_key_press(event):
                 open_new_row_popup()
             case "s" | "S":
                 save()
+            case "m" | "M":
+                listPopup.open_choose_row_popup(manager)
             case _:
                 return
 
@@ -220,6 +223,7 @@ decrementBtn = None
 manualSetBtn = None
 saveBtn = None
 newBtn = None
+menuBtn = None
 inputField = None
 
 # Initialize variables and services
@@ -227,6 +231,7 @@ inputField = None
 
 storageService = StorageService(logger, window)
 manager = AppManager(storageService)
+listPopup = PopupDialog(window)
 
 if not manager.has_rows():
     # to run after mainloop of the window is created, prevents first popup not closing
@@ -250,6 +255,7 @@ decrementBtn = Button(window, text="Sub", state=initial_decrement_state, font=bt
 manualSetBtn = Button(window, text="Set", font=btn_font, width=4, height=1, command=toggle_input_field)
 saveBtn = Button(window, text="Save", font=btn_font, width=4, height=1, command=save)
 newBtn = Button(window, text="New", font=btn_font, width=4, height=1, command=open_new_row_popup)
+menuBtn = Button(window, text="☰", font=btn_font, command=lambda: listPopup.open_choose_row_popup(manager))
 
 inputField = Entry(window, validate="key", validatecommand=(validate_cmd, "%P"))
 
@@ -268,6 +274,9 @@ canvas.create_window(30,
 canvas.create_window(270,
                      275,
                      window=newBtn)
+canvas.create_window(275,
+                     25,
+                     window=menuBtn)
 
 # App bindings and main loop
 # --------------------------
