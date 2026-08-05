@@ -1,6 +1,6 @@
 # Only necessary to delete .spec file before pyinstaller command
-# pyinstaller --clean --onefile --noconsole --icon icon.ico your_script.py
-# ------------------------------------------------------------------------
+# pyinstaller --clean --onefile --noconsole --icon assets/icon.ico your_script.py
+# -------------------------------------------------------------------------------
 
 from tkinter import Tk, Canvas, Button, Entry, Toplevel, font, END
 from services.AppManager import AppManager
