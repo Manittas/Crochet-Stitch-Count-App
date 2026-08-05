@@ -11,3 +11,6 @@ def GetBasePath():
         # Running from source
         base_path = Path(__file__).resolve().parent
     return base_path
+
+def IsNumber(char):
+    return char.isdigit() or char == ""

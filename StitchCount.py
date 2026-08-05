@@ -6,6 +6,7 @@ from tkinter import Tk, Canvas, Button, Entry, Toplevel, font, END
 from services.AppManager import AppManager
 from services.LogService import LogService
 from services.StorageService import StorageService
+from utils.Helpers import IsNumber
 
 import sys
 
@@ -121,9 +122,6 @@ def toggle_input_field():
     else:
         manager.inputVisible = True
         manager.inputWindow = canvas.create_window(150, 210, window=inputField)
-        
-def is_number(char):
-    return char.isdigit() or char == ""
 
 def save():
     statusOK = storageService.save_rows(manager.rowsList)
@@ -245,7 +243,7 @@ if manager.has_rows():
     initial_decrement_state = ("normal" if manager.rowsList[manager.currentIndex].count > 0 else "disabled")
 else:
     initial_decrement_state = "disabled"
-validate_cmd = window.register(is_number)
+validate_cmd = window.register(IsNumber)
 
 incrementBtn = Button(window, text="Add", font=btn_font, width=4, height=1, command=increment_button_click)
 decrementBtn = Button(window, text="Sub", state=initial_decrement_state, font=btn_font, width=4, height=1, command=decrement_button_click)
