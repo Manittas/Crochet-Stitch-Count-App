@@ -2,7 +2,7 @@
 # pyinstaller --clean --onefile --noconsole --icon assets/icon.ico your_script.py
 # -------------------------------------------------------------------------------
 
-from tkinter import Tk, Canvas, Button, Entry, Toplevel, font, END
+from tkinter import Tk, Canvas, Button, Entry, font, END
 from services.AppManager import AppManager
 from services.LogService import LogService
 from services.StorageService import StorageService
@@ -58,7 +58,7 @@ def on_key_press(event):
             case "s" | "S":
                 save()
             case "m" | "M":
-                listPopup.open_choose_row_popup(manager)
+                popupService.choose_row_popup(manager)
             case _:
                 return
 
@@ -136,28 +136,7 @@ def save():
 # -------------
 
 def open_new_row_popup(is_startup = False):
-    popup = Toplevel(window)
-    popup.title("New Row Name")
-    popup_width = 200
-    popup_height = 100
-    # get relative positioning of the main window
-    window.update_idletasks()
-    main_x = window.winfo_x()
-    main_y = window.winfo_y()
-    main_width = window.winfo_width()
-    main_height = window.winfo_height()
-    # Center the popup over the main window
-    x = main_x + (main_width - popup_width) // 2
-    y = main_y + (main_height - popup_height) // 2
-    popup.geometry(f"{popup_width}x{popup_height}+{x}+{y}")
-    popup.resizable(False, False)
-    # Make it modal
-    popup.transient(window)
-    popup.grab_set()
-    # put it on top always
-    popup.attributes("-topmost", True)
-    popup.lift()
-    popup.focus_force()
+    popup = popupService.new_row_popup()
     # input
     nameInput = Entry(popup, width=30)
     nameInput.pack()
@@ -231,7 +210,7 @@ inputField = None
 
 storageService = StorageService(logger, window)
 manager = AppManager(storageService)
-listPopup = PopupDialog(window)
+popupService = PopupDialog(window)
 
 if not manager.has_rows():
     # to run after mainloop of the window is created, prevents first popup not closing
@@ -255,7 +234,7 @@ decrementBtn = Button(window, text="Sub", state=initial_decrement_state, font=bt
 manualSetBtn = Button(window, text="Set", font=btn_font, width=4, height=1, command=toggle_input_field)
 saveBtn = Button(window, text="Save", font=btn_font, width=4, height=1, command=save)
 newBtn = Button(window, text="New", font=btn_font, width=4, height=1, command=open_new_row_popup)
-menuBtn = Button(window, text="☰", font=btn_font, command=lambda: listPopup.open_choose_row_popup(manager))
+menuBtn = Button(window, text="☰", font=btn_font, command=lambda: popupService.choose_row_popup(manager))
 
 inputField = Entry(window, validate="key", validatecommand=(validate_cmd, "%P"))
 

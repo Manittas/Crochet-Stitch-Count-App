@@ -7,11 +7,24 @@ class PopupDialog:
     
     ###################################################
     
-    def open_choose_row_popup(self, manager):
+    def new_row_popup(self):
+        popup = Toplevel(self.window)
+        popup.title("New Row Name")
+        popup_width = 200
+        popup_height = 100
+        self.set_popup_size(popup, popup_width, popup_height)
+        return popup
+    
+    def choose_row_popup(self, manager):
         popup = Toplevel(self.window)
         popup.title(f"Choose Row: {len(manager.rowsList)}")
         popup_width = 200
         popup_height = 100
+        self.set_popup_size(popup, popup_width, popup_height)
+        # Wait until popup is closed
+        self.window.wait_window(popup)
+        
+    def set_popup_size(self, popup, width, height):
         # get relative positioning of the main window
         self.window.update_idletasks()
         main_x = self.window.winfo_x()
@@ -19,9 +32,9 @@ class PopupDialog:
         main_width = self.window.winfo_width()
         main_height = self.window.winfo_height()
         # Center the popup over the main window
-        x = main_x + (main_width - popup_width) // 2
-        y = main_y + (main_height - popup_height) // 2
-        popup.geometry(f"{popup_width}x{popup_height}+{x}+{y}")
+        x = main_x + (main_width - width) // 2
+        y = main_y + (main_height - height) // 2
+        popup.geometry(f"{width}x{height}+{x}+{y}")
         popup.resizable(False, False)
         # Make it modal
         popup.transient(self.window)
@@ -30,5 +43,3 @@ class PopupDialog:
         popup.attributes("-topmost", True)
         popup.lift()
         popup.focus_force()
-        # Wait until popup is closed
-        self.window.wait_window(popup)
