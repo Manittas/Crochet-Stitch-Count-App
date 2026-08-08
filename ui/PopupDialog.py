@@ -12,7 +12,7 @@ class PopupDialog:
         popup.title("New Row Name")
         popup_width = 200
         popup_height = 100
-        self.set_popup_size(popup, popup_width, popup_height)
+        self.set_popup_properties(popup, popup_width, popup_height)
         return popup
     
     def choose_row_popup(self, manager):
@@ -20,11 +20,11 @@ class PopupDialog:
         popup.title(f"Choose Row: {len(manager.rowsList)}")
         popup_width = 200
         popup_height = 100
-        self.set_popup_size(popup, popup_width, popup_height)
+        self.set_popup_properties(popup, popup_width, popup_height)
         # Wait until popup is closed
         self.window.wait_window(popup)
         
-    def set_popup_size(self, popup, width, height):
+    def set_popup_properties(self, popup, width, height):
         # get relative positioning of the main window
         self.window.update_idletasks()
         main_x = self.window.winfo_x()

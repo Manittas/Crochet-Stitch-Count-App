@@ -2,10 +2,11 @@
 # pyinstaller --clean --onefile --noconsole --icon assets/icon.ico your_script.py
 # -------------------------------------------------------------------------------
 
-from tkinter import Tk, Canvas, Button, Entry, font, END
+from tkinter import Tk, Button, Entry, font, END
 from services.AppManager import AppManager
 from services.LogService import LogService
 from services.StorageService import StorageService
+from ui.CanvasRenderer import CanvasRenderer
 from ui.PopupDialog import PopupDialog
 from utils.Helpers import IsNumber
 
@@ -29,16 +30,7 @@ window.geometry("300x300")
 window.resizable(False, False)
 window.attributes("-topmost", True)
 
-canvas = Canvas(
-    window,
-    bg = "#121212",
-    width = 300,
-    height = 300,
-    bd = 0,
-    highlightthickness = 0,
-    relief = "ridge"
-)
-canvas.pack()
+renderer = CanvasRenderer(window)
 
 # functionality methods
 # ---------------------
@@ -88,10 +80,10 @@ def new_row(inputEntry, popup):
     name = inputEntry.get()
     manager.new_row(name = name if name else "row")
     # update visible objects
-    update_row_name()
+    renderer.update_row_name(manager, rowName)
     update_count()
     # make New! tag visible after updating canva and set new name
-    canvas.itemconfig(newLabel, state="normal")
+    renderer.set_label_state_normal(newLabel)
     # destroy popup and input
     popup.grab_release()
     popup.destroy()
@@ -100,19 +92,13 @@ def update_count():
     if not manager.has_rows():
         return
     row = manager.rowsList[manager.currentIndex]
-    canvas.itemconfig(rowLabel, text=f"Stitch Count: {row.count}")
+    renderer.set_label_text(label=rowLabel, text=f"Stitch Count: {row.count}")
     # always make New! and Saved! tag invisible at any update
-    canvas.itemconfig(newLabel, state="hidden")
-    canvas.itemconfig(saveLabel, state="hidden")
+    renderer.set_label_state_hidden(newLabel)
+    renderer.set_label_state_hidden(saveLabel)
     # toggles/untoggles decrement button depending on count value update
     if decrementBtn is not None:
         decrementBtn.config(state="normal" if row.count > 0 else "disabled")
-
-def update_row_name():
-    if not manager.has_rows():
-        return
-    row = manager.rowsList[manager.currentIndex]
-    canvas.itemconfig(rowName, text=row.name)
 
 def toggle_input_field():
     # deletes any value in the field, visibe or not
@@ -120,17 +106,17 @@ def toggle_input_field():
     # creates / destroys the input field to be visible
     if manager.inputVisible:
         manager.inputVisible = False
-        canvas.delete(manager.inputWindow)
+        renderer.delete_input_window(manager.inputWindow)
         manager.inputWindow = None
     else:
         manager.inputVisible = True
-        manager.inputWindow = canvas.create_window(150, 210, window=inputField)
+        manager.inputWindow = renderer.create_input_window(inputField)
 
 def save():
     statusOK = storageService.save_rows(manager.rowsList)
     if statusOK:
         # show saved label
-        canvas.itemconfig(saveLabel, state="normal")
+        renderer.set_label_state_normal(saveLabel)
 
 # Popup methods
 # -------------
@@ -155,44 +141,14 @@ def open_new_row_popup(is_startup = False):
     # Popup closed and no row added on open if no save file closes app
     if is_startup and not manager.has_rows():
         window.destroy()
+        
+# Render labels
+# -------------
 
-# labels
-# ------
-
-canvas.create_text(150,
-                   20,
-                   text="Row",
-                   fill="white",
-                   font=("Arial", 12, "bold"))
-
-saveLabel = canvas.create_text(150,
-                              95,
-                              text="Saved!",
-                              fill="Green",
-                              font=("Arial", 12, "bold", "italic"),
-                              state="hidden")
-
-newLabel = canvas.create_text(102,
-                              20,
-                              text="NEW!",
-                              fill="Yellow",
-                              font=("Arial", 12, "bold"),
-                              state="hidden")
-
-# labels dependent on variables
-# -----------------------------
-
-rowName = canvas.create_text(150,
-                              45,
-                              text="",
-                              fill="white",
-                              font=("Arial", 12))
-
-rowLabel = canvas.create_text(150,
-                              120,
-                              text="",
-                              fill="white",
-                              font=("Arial", 16, "bold"))
+saveLabel, newLabel, rowName, rowLabel = renderer.first_render_labels()
+        
+# Declare window related objects
+# ------------------------------
 
 btn_font = None
 initial_decrement_state = None
@@ -216,7 +172,7 @@ if not manager.has_rows():
     # to run after mainloop of the window is created, prevents first popup not closing
     window.after(0, lambda: open_new_row_popup(True))
 else:
-    update_row_name()
+    renderer.update_row_name(manager, rowName)
     update_count()
 
 # buttons & Inputs
@@ -238,24 +194,7 @@ menuBtn = Button(window, text="☰", font=btn_font, command=lambda: popupService
 
 inputField = Entry(window, validate="key", validatecommand=(validate_cmd, "%P"))
 
-canvas.create_window(200,
-                     175,
-                     window=incrementBtn)
-canvas.create_window(150,
-                     175,
-                     window=manualSetBtn)
-canvas.create_window(100,
-                     175,
-                     window=decrementBtn)
-canvas.create_window(30,
-                     275,
-                     window=saveBtn)
-canvas.create_window(270,
-                     275,
-                     window=newBtn)
-canvas.create_window(275,
-                     25,
-                     window=menuBtn)
+renderer.first_render_buttons(incrementBtn, manualSetBtn, decrementBtn, saveBtn, newBtn, menuBtn)
 
 # App bindings and main loop
 # --------------------------
