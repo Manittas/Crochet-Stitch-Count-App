@@ -11,7 +11,7 @@ class CanvasRenderer:
     def create_canvas(self):
         self.canvas = Canvas(
             self.window,
-            bg = "#121212",
+            bg = "#90489c",
             width = 300,
             height = 300,
             bd = 0,
@@ -31,7 +31,7 @@ class CanvasRenderer:
         self.saveLabel = self.canvas.create_text(150,
                                       95,
                                       text="Saved!",
-                                      fill="Green",
+                                      fill="#75f075", # green
                                       font=("Arial", 12, "bold", "italic"),
                                       state="hidden")
         self.newLabel = self.canvas.create_text(102,
