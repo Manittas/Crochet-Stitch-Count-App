@@ -73,7 +73,7 @@ class CanvasRenderer:
         self.canvas.create_window(275,
                              25,
                              window=menuBtn)
-        
+    
     # -------------------------------------------------
     
     def create_input_window(self, inputWindow):
@@ -94,6 +94,12 @@ class CanvasRenderer:
     
     def set_label_state_hidden(self, label):
         self.canvas.itemconfig(label, state="hidden")
+        
+    # -------------------------------------------------
+    
+    def hide_poping_labels(self):
+        self.canvas.itemconfig(self.saveLabel, state="hidden")
+        self.canvas.itemconfig(self.newLabel, state="hidden")
     
     # -------------------------------------------------
     

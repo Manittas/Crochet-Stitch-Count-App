@@ -94,8 +94,7 @@ def update_count():
     row = manager.rowsList[manager.currentIndex]
     renderer.set_count_label_text(f"Stitch Count: {row.count}")
     # always make New! and Saved! tag invisible at any update
-    renderer.set_label_state_hidden(newLabel)
-    renderer.set_label_state_hidden(saveLabel)
+    renderer.hide_poping_labels()
     # toggles/untoggles decrement button depending on count value update
     if decrementBtn is not None:
         decrementBtn.config(state="normal" if row.count > 0 else "disabled")

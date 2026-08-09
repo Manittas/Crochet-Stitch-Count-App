@@ -1,4 +1,4 @@
-from tkinter import Toplevel, Listbox, Scrollbar, RIGHT, Y, END
+from tkinter import Frame, Button, Toplevel, Canvas, Scrollbar
 
 class PopupDialog:
     def __init__(self, _window):
@@ -16,33 +16,48 @@ class PopupDialog:
         return popup
     
     def choose_row_popup(self, manager, decrementBtn):
+        # set manager and decrementBtn for the occasion
+        self.manager = manager
+        self.decrementBtn = decrementBtn
+        # set window popup
         popup = Toplevel(self.window)
         popup.title("Choose Row")
-        popup_width = 200
-        popup_height = 100
+        popup_width = 240
+        popup_height = 160
         self.set_popup_properties(popup, popup_width, popup_height)
-        # show list of rows
-        listbox = Listbox(popup)
-        listbox.pack(side="left", fill="both", expand=True)
-        # Scrollbar
-        scrollbar = Scrollbar(popup, command=listbox.yview)
-        scrollbar.pack(side=RIGHT, fill=Y)
-        listbox.config(yscrollcommand=scrollbar.set)
+        # render canvas area for items
+        canvasPopup, rowsFrame, canvasWindow = self.scrollable_area_rows(popup)
+        # Update scrollable area whenever rowsFrame changes, add mouse-wheel scroll
+        rowsFrame.bind(
+            "<Configure>",
+            lambda event: self.update_scroll_region(event, canvasPopup)
+        )
+        canvasPopup.bind(
+            "<Configure>",
+            lambda event: self.update_frame_width(event, canvasPopup, canvasWindow)
+        )
+        # Mouse wheel
+        canvasPopup.bind(
+            "<MouseWheel>",
+            lambda event: self.scroll_rows(event, canvasPopup)
+        )
+        rowsFrame.bind(
+            "<MouseWheel>",
+            lambda event: self.scroll_rows(event, canvasPopup)
+        )
         # create click event
         for row in manager.rowsList:
-            listbox.insert(END, row.name)
-        # Handle click
-        def select_row(event):
-            selection = listbox.curselection()
-            if selection:
-                index = selection[0]
-                manager.set_visible_row(index, decrementBtn)
-                popup.destroy()
-        # bind selection event
-        listbox.bind("<<ListboxSelect>>", select_row)
+            self.render_row_item(popup, canvasPopup, rowsFrame, row)
+        # Force Tkinter to process geometry changes
+        popup.update_idletasks()
+        # Make sure scroll region is calculated
+        canvasPopup.configure(scrollregion=canvasPopup.bbox("all"))
         # Wait until popup is closed
         self.window.wait_window(popup)
         
+    # Properties methods
+    # ------------------
+    
     def set_popup_properties(self, popup, width, height):
         # get relative positioning of the main window
         self.window.update_idletasks()
@@ -62,4 +77,108 @@ class PopupDialog:
         popup.attributes("-topmost", True)
         popup.lift()
         popup.focus_force()
+    
+    # Render methods
+    # --------------
+        
+    def scrollable_area_rows(self, popup):
+        container = Frame(popup)
+        container.pack(
+            fill="both",
+            expand=True,
+            padx=5,
+            pady=5
+        )
+        # Canvas
+        canvas = Canvas(
+            container,
+            bg="white",
+            highlightthickness=1,
+            bd=0
+        )
+        canvas.grid(
+            row=0,
+            column=0,
+            sticky="nsew"
+        )
+        # Scrollbar
+        scrollbar = Scrollbar(
+            container,
+            orient="vertical",
+            command=canvas.yview,
+            width=15
+        )
+        scrollbar.grid(
+            row=0,
+            column=1,
+            sticky="ns"
+        )
+        # Allow canvas to expand
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
+        canvas.configure(yscrollcommand=scrollbar.set)
+        # Frame containing the rows
+        rowsFrame = Frame(canvas)
+        canvasWindow = canvas.create_window(
+            (0, 0),
+            window=rowsFrame,
+            anchor="nw"
+        )
+        return canvas, rowsFrame, canvasWindow
+        
+    def render_row_item(self, popup, canvas, rowsFrame, row):
+        rowFrame = Frame(rowsFrame)
+        rowFrame.pack(fill="x", padx=10, pady=3)
+        # Row name
+        rowButton = Button(
+            rowFrame,
+            text=row.name,
+            anchor="w",
+            command=lambda r=row: self.select_row(r, popup)
+        )
+        rowButton.pack(
+            side="left",
+            fill="x",
+            expand=True
+        )
+        # Delete button
+        deleteButton = Button(
+            rowFrame,
+            text="🗑",
+            width=3,
+            command=lambda r=row: self.delete_row(r, popup)
+        )
+        deleteButton.pack(side="right")
+        # Make mouse wheel work when cursor is over the row
+        rowFrame.bind(
+            "<MouseWheel>",
+            lambda event: self.scroll_rows(event, canvas)
+        )
+        rowButton.bind(
+            "<MouseWheel>",
+            lambda event: self.scroll_rows(event, canvas)
+        )
+        deleteButton.bind(
+            "<MouseWheel>",
+            lambda event: self.scroll_rows(event, canvas)
+        )
+        
+    # Event methods
+    # -------------
+    
+    def update_scroll_region(self, event, canvas):
+        canvas.configure(scrollregion=canvas.bbox("all"))
+        
+    def update_frame_width(self, event, canvas, canvasWindow):
+        canvas.itemconfig(canvasWindow, width=event.width)
+    
+    def scroll_rows(self, event, canvas):
+        canvas.yview_scroll(int(-event.delta / 120),"units")
+        
+    def select_row(self, row, popup):
+        self.manager.set_visible_row(row.rowId, self.decrementBtn)
+        popup.destroy()
+            
+    def delete_row(self, row, popup):
+        popup.destroy()
         

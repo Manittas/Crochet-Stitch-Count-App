@@ -40,12 +40,14 @@ class AppManager:
         self.rowsList.append(newRow)
         self.currentIndex = len(self.rowsList) - 1
         
-    def set_visible_row(self, index, decrementBtn):
+    def set_visible_row(self, rowId, decrementBtn):
+        index = next(i for i, row in enumerate(self.rowsList) if row.rowId == rowId)
         self.rowsList[self.currentIndex].isCurrent = False
         self.rowsList[index].isCurrent = True
         self.currentIndex = index
         self.renderer.update_row_name(manager=self)
         self.renderer.set_count_label_text(f"Stitch Count: {self.rowsList[index].count}")
+        self.renderer.hide_poping_labels()
         # toggles/untoggles decrement button depending on count value update
         if decrementBtn is not None:
             decrementBtn.config(state="normal" if self.rowsList[index].count > 0 else "disabled")

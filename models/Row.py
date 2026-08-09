@@ -1,8 +1,8 @@
 import uuid
 
 class Row:
-    def __init__(self, _name, _id = uuid.uuid4().hex, _count = 0, _isCurrent = False):
-        self._id = _id
+    def __init__(self, _name, _id=None, _count = 0, _isCurrent = False):
+        self._id = _id if _id is not None else uuid.uuid4().hex
         self._name = _name
         self._count = _count
         self._isCurrent = _isCurrent
