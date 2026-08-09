@@ -141,14 +141,16 @@ class PopupDialog:
             fill="x",
             expand=True
         )
-        # Delete button
-        deleteButton = Button(
-            rowFrame,
-            text="🗑",
-            width=3,
-            command=lambda r=row: self.delete_row(r, popup, canvas, rowsFrame)
-        )
-        deleteButton.pack(side="right")
+        # Delete button if more than 1 row
+        can_delete = len(self.manager.rowsList) > 1
+        if can_delete:
+            deleteButton = Button(
+                rowFrame,
+                text="🗑",
+                width=3,
+                command=lambda r=row: self.delete_row(r, popup, canvas, rowsFrame)
+            )
+            deleteButton.pack(side="right")
         # Make mouse wheel work when cursor is over the row
         rowFrame.bind(
             "<MouseWheel>",
@@ -158,10 +160,11 @@ class PopupDialog:
             "<MouseWheel>",
             lambda event: self.scroll_rows(event, canvas)
         )
-        deleteButton.bind(
-            "<MouseWheel>",
-            lambda event: self.scroll_rows(event, canvas)
-        )
+        if can_delete:
+            deleteButton.bind(
+                "<MouseWheel>",
+                lambda event: self.scroll_rows(event, canvas)
+            )
         
     # Event methods
     # -------------
@@ -180,8 +183,11 @@ class PopupDialog:
         popup.destroy()
             
     def delete_row(self, row, popup, canvas, rowsFrame):
-        self.manager.delete_row(row.rowId, self.decrementBtn)
-        self.refresh_rows(popup, canvas, rowsFrame)
+        shouldClose = self.manager.delete_row(row.rowId, self.decrementBtn)
+        if shouldClose:
+            popup.destroy()
+        else:
+            self.refresh_rows(popup, canvas, rowsFrame)
     
     def refresh_rows(self, popup, canvas, rowsFrame):
         # Remove existing row widgets

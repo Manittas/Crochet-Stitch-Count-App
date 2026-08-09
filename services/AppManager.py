@@ -72,14 +72,18 @@ class AppManager:
         self.currentIndex = len(self.rowsList) - 1
             
     def delete_row(self, rowId, decrementBtn):
+        # Prevent deleting the last row
+        if len(self.rowsList) <= 1:
+            return True
         index = self.get_index_by_id(rowId)
         was_current = index == self.currentIndex
         del self.rowsList[index]
-        # No rows left
-        if not self.has_rows():
+        # If only one row remains, make it current
+        if len(self.rowsList) == 1:
             self.currentIndex = 0
-            # TODO no Rows
-            return
+            self.rowsList[0].isCurrent = True
+            self.update_row_renderers(self.currentIndex, decrementBtn)
+            return True
         # Deleted a row before the current row
         if index < self.currentIndex:
             self.currentIndex -= 1
@@ -88,4 +92,5 @@ class AppManager:
             self.currentIndex = min(self.currentIndex, len(self.rowsList) - 1)
             self.rowsList[self.currentIndex].isCurrent = True
             self.update_row_renderers(self.currentIndex, decrementBtn)
+        return False
  
