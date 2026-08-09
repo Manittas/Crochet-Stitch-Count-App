@@ -29,28 +29,9 @@ class AppManager:
     
     def has_rows(self):
         return len(self.rowsList) > 0
-        
-    def new_row(self, name):
-        newRow = Row(_name = name, _isCurrent=True)
-        newRow.name = self.get_unique_name(name)
-        # If there is already a current row, unset it
-        if self.has_rows():
-            self.rowsList[self.currentIndex].isCurrent = False
-        # append and update
-        self.rowsList.append(newRow)
-        self.currentIndex = len(self.rowsList) - 1
-        
-    def set_visible_row(self, rowId, decrementBtn):
-        index = next(i for i, row in enumerate(self.rowsList) if row.rowId == rowId)
-        self.rowsList[self.currentIndex].isCurrent = False
-        self.rowsList[index].isCurrent = True
-        self.currentIndex = index
-        self.renderer.update_row_name(manager=self)
-        self.renderer.set_count_label_text(f"Stitch Count: {self.rowsList[index].count}")
-        self.renderer.hide_poping_labels()
-        # toggles/untoggles decrement button depending on count value update
-        if decrementBtn is not None:
-            decrementBtn.config(state="normal" if self.rowsList[index].count > 0 else "disabled")
+    
+    def get_index_by_id(self, rowId):
+        return next(i for i, row in enumerate(self.rowsList) if row.rowId == rowId)
     
     def get_unique_name(self, name):
         # Remove any existing " (number)" suffix
@@ -63,3 +44,48 @@ class AppManager:
         while f"{base_name} ({i})" in used_names:
             i += 1
         return f"{base_name} ({i})"
+    
+    def update_row_renderers(self, index, decrementBtn):
+        self.renderer.update_row_name(manager=self)
+        count = self.rowsList[self.currentIndex].count
+        self.renderer.set_count_label_text(f"Stitch Count: {count}")
+        self.renderer.hide_poping_labels()
+        # toggles/untoggles decrement button depending on count value update
+        if decrementBtn is not None:
+            decrementBtn.config(state="normal" if self.rowsList[index].count > 0 else "disabled")
+        
+    def set_visible_row(self, rowId, decrementBtn):
+        index = self.get_index_by_id(rowId)
+        self.rowsList[self.currentIndex].isCurrent = False
+        self.rowsList[index].isCurrent = True
+        self.currentIndex = index
+        self.update_row_renderers(self.currentIndex, decrementBtn)
+            
+    def new_row(self, name):
+        newRow = Row(_name = name, _isCurrent=True)
+        newRow.name = self.get_unique_name(name)
+        # If there is already a current row, unset it
+        if self.has_rows():
+            self.rowsList[self.currentIndex].isCurrent = False
+        # append and update
+        self.rowsList.append(newRow)
+        self.currentIndex = len(self.rowsList) - 1
+            
+    def delete_row(self, rowId, decrementBtn):
+        index = self.get_index_by_id(rowId)
+        was_current = index == self.currentIndex
+        del self.rowsList[index]
+        # No rows left
+        if not self.has_rows():
+            self.currentIndex = 0
+            # TODO no Rows
+            return
+        # Deleted a row before the current row
+        if index < self.currentIndex:
+            self.currentIndex -= 1
+        # Deleted the current row
+        elif was_current:
+            self.currentIndex = min(self.currentIndex, len(self.rowsList) - 1)
+            self.rowsList[self.currentIndex].isCurrent = True
+            self.update_row_renderers(self.currentIndex, decrementBtn)
+ 
