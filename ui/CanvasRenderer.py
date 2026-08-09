@@ -28,29 +28,29 @@ class CanvasRenderer:
                            text="Row",
                            fill="white",
                            font=("Arial", 12, "bold"))
-        saveLabel = self.canvas.create_text(150,
+        self.saveLabel = self.canvas.create_text(150,
                                       95,
                                       text="Saved!",
                                       fill="Green",
                                       font=("Arial", 12, "bold", "italic"),
                                       state="hidden")
-        newLabel = self.canvas.create_text(102,
+        self.newLabel = self.canvas.create_text(102,
                                       20,
                                       text="NEW!",
                                       fill="Yellow",
                                       font=("Arial", 12, "bold"),
                                       state="hidden")
-        rowName = self.canvas.create_text(150,
+        self.rowName = self.canvas.create_text(150,
                                       45,
                                       text="",
                                       fill="white",
                                       font=("Arial", 12))
-        rowLabel = self.canvas.create_text(150,
+        self.rowLabel = self.canvas.create_text(150,
                                       120,
                                       text="",
                                       fill="white",
                                       font=("Arial", 16, "bold"))
-        return saveLabel, newLabel, rowName, rowLabel
+        return self.saveLabel, self.newLabel
     
     # -------------------------------------------------
     
@@ -102,8 +102,13 @@ class CanvasRenderer:
     
     # -------------------------------------------------
     
-    def update_row_name(self, manager, rowName):
+    def set_count_label_text(self, text):
+        self.canvas.itemconfig(self.rowLabel, text=text)
+        
+    # -------------------------------------------------
+    
+    def update_row_name(self, manager):
         if not manager.has_rows():
             return
         row = manager.rowsList[manager.currentIndex]
-        self.set_label_text(label=rowName, text=row.name)
+        self.set_label_text(label=self.rowName, text=row.name)

@@ -50,7 +50,7 @@ def on_key_press(event):
             case "s" | "S":
                 save()
             case "m" | "M":
-                popupService.choose_row_popup(manager)
+                popupService.choose_row_popup(manager, decrementBtn)
             case _:
                 return
 
@@ -80,7 +80,7 @@ def new_row(inputEntry, popup):
     name = inputEntry.get()
     manager.new_row(name = name if name else "row")
     # update visible objects
-    renderer.update_row_name(manager, rowName)
+    renderer.update_row_name(manager)
     update_count()
     # make New! tag visible after updating canva and set new name
     renderer.set_label_state_normal(newLabel)
@@ -92,7 +92,7 @@ def update_count():
     if not manager.has_rows():
         return
     row = manager.rowsList[manager.currentIndex]
-    renderer.set_label_text(label=rowLabel, text=f"Stitch Count: {row.count}")
+    renderer.set_count_label_text(f"Stitch Count: {row.count}")
     # always make New! and Saved! tag invisible at any update
     renderer.set_label_state_hidden(newLabel)
     renderer.set_label_state_hidden(saveLabel)
@@ -145,7 +145,7 @@ def open_new_row_popup(is_startup = False):
 # Render labels
 # -------------
 
-saveLabel, newLabel, rowName, rowLabel = renderer.first_render_labels()
+saveLabel, newLabel = renderer.first_render_labels()
         
 # Declare window related objects
 # ------------------------------
@@ -165,14 +165,14 @@ inputField = None
 # ---------------------------------
 
 storageService = StorageService(logger, window)
-manager = AppManager(storageService)
+manager = AppManager(storageService, renderer)
 popupService = PopupDialog(window)
 
 if not manager.has_rows():
     # to run after mainloop of the window is created, prevents first popup not closing
     window.after(0, lambda: open_new_row_popup(True))
 else:
-    renderer.update_row_name(manager, rowName)
+    renderer.update_row_name(manager)
     update_count()
 
 # buttons & Inputs
@@ -190,7 +190,7 @@ decrementBtn = Button(window, text="Sub", state=initial_decrement_state, font=bt
 manualSetBtn = Button(window, text="Set", font=btn_font, width=4, height=1, command=toggle_input_field)
 saveBtn = Button(window, text="Save", font=btn_font, width=4, height=1, command=save)
 newBtn = Button(window, text="New", font=btn_font, width=4, height=1, command=open_new_row_popup)
-menuBtn = Button(window, text="☰", font=btn_font, command=lambda: popupService.choose_row_popup(manager))
+menuBtn = Button(window, text="☰", font=btn_font, command=lambda: popupService.choose_row_popup(manager, decrementBtn))
 
 inputField = Entry(window, validate="key", validatecommand=(validate_cmd, "%P"))
 

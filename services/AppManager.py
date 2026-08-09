@@ -3,8 +3,9 @@ from models.Row import Row
 import re
 
 class AppManager:
-    def __init__(self, _storageService):
+    def __init__(self, _storageService, _renderer):
         self.storageService = _storageService
+        self.renderer = _renderer
         # flags
         self.inputVisible = False  # toggles the input field to be visible
         self.inputWindow = None    # default store value for canvas window ID
@@ -38,6 +39,16 @@ class AppManager:
         # append and update
         self.rowsList.append(newRow)
         self.currentIndex = len(self.rowsList) - 1
+        
+    def set_visible_row(self, index, decrementBtn):
+        self.rowsList[self.currentIndex].isCurrent = False
+        self.rowsList[index].isCurrent = True
+        self.currentIndex = index
+        self.renderer.update_row_name(manager=self)
+        self.renderer.set_count_label_text(f"Stitch Count: {self.rowsList[index].count}")
+        # toggles/untoggles decrement button depending on count value update
+        if decrementBtn is not None:
+            decrementBtn.config(state="normal" if self.rowsList[index].count > 0 else "disabled")
     
     def get_unique_name(self, name):
         # Remove any existing " (number)" suffix
