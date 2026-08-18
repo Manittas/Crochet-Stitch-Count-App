@@ -45,7 +45,7 @@ The application provides a dedicated row-selection popup.
 
 ### Persistent Data
 
-To save your Row data, simpy click the `Save` button or the `s` key. Row data is stored locally so that application state can be restored between sessions.
+To save your Row data, simply click the `Save` button or the `s` key. Row data is stored locally so that application state can be restored between sessions.
 
 The application supports:
 
