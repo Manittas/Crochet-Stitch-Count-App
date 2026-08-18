@@ -98,9 +98,8 @@ The project is built using:
 
 The repository contains platform-specific build scripts:
 
-    builder/
-    ├── build.bat
-    └── build.command
+    builder/build.bat
+    builder/build.command
 
 The build scripts automatically:
 
