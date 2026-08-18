@@ -1,9 +1,3 @@
-# Only necessary to delete .spec file before pyinstaller command
-# windows: pyinstaller --clean --onefile --noconsole --icon assets/icon.ico your_script.py
-# macOS: pyinstaller --clean --onefile --windowed --icon assets/icon.icns your_script.py
-# necessary to install python ang pyinstaller: pip install pyinstaller
-# -------------------------------------------------------------------------------
-
 from tkinter import Tk, Button, Entry, font, END
 from services.AppManager import AppManager
 from services.LogService import LogService

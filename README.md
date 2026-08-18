@@ -6,7 +6,7 @@ The application was developed in **Python** using **Tkinter**, with a modular ar
 
 ---
 
-# Future Improvements
+## Future Improvements
 
 with future releases, the improvements are aiming to include:
 
@@ -82,7 +82,7 @@ The builder is separate from the application itself and is located in `builder/`
 - Windows
 - macOS
 
-# Technologies
+## Technologies
 
 The project is built using:
 
@@ -90,10 +90,11 @@ The project is built using:
 - **Tkinter**
 - **PyInstaller**
 - **JSON** for persistent application data
+- **Batchfile and Shell** for building the app
 
 ---
 
-# Building the Application
+## Building the Application
 
 The repository contains platform-specific build scripts:
 
@@ -110,7 +111,7 @@ The build scripts automatically:
 5. Remove previous build files.
 6. Build the standalone application.
 
-# Requirements
+## Requirements
 
 - Python 3
 
@@ -118,7 +119,7 @@ PyInstaller does not need to be installed manually. The build scripts check for 
 
 ---
 
-# Windows Build
+## Windows Build
 
 From Windows, double-click:
 
@@ -132,7 +133,7 @@ The resulting `StitchCount.exe` can be run without manually starting the Python 
 
 ---
 
-# macOS Build
+## macOS Build
 
 In the macOS, double-click the build script file in Finder:
 
@@ -148,7 +149,7 @@ The resulting application will be created in:
 
 ---
 
-# Notes
+## Notes
 
 - The Windows and macOS applications must be built separately.
 - The build scripts are located in the `builder` directory.
