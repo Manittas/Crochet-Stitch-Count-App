@@ -13,14 +13,34 @@ echo
 if ! command -v python3 &> /dev/null; then
     echo "ERROR: Python 3 was not found."
     echo
-    echo "Please install Python from:"
+    echo "Please install Python 3.12 or newer from:"
     echo "https://www.python.org/downloads/"
     echo
     read -p "Press Enter to exit..."
     exit 1
 fi
 
-python3 --version
+PYTHON_VERSION=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
+
+echo "Python version: $PYTHON_VERSION"
+
+PYTHON_MAJOR=$(python3 -c 'import sys; print(sys.version_info.major)')
+PYTHON_MINOR=$(python3 -c 'import sys; print(sys.version_info.minor)')
+
+if [ "$PYTHON_MAJOR" -lt 3 ] || \
+   { [ "$PYTHON_MAJOR" -eq 3 ] && [ "$PYTHON_MINOR" -lt 12 ]; }; then
+
+    echo
+    echo "ERROR: Python 3.12 or newer is required."
+    echo "Current version: $PYTHON_VERSION"
+    echo
+    echo "Please update Python and try again."
+    echo
+    read -p "Press Enter to exit..."
+    exit 1
+fi
+
+echo "Python version is supported."
 
 echo
 echo "[2/5] Checking PyInstaller..."

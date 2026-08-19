@@ -112,7 +112,7 @@ The build scripts automatically:
 
 ## Requirements
 
-- Python 3
+- Python 3, **minimum version 3.12**
 
 PyInstaller does not need to be installed manually. The build scripts check for it and install it if necessary.
 

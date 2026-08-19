@@ -18,7 +18,7 @@ if %errorlevel% neq 0 (
     echo.
     echo ERROR: Python was not found.
     echo.
-    echo Please install Python from:
+    echo Please install Python 3.12 or newer from:
     echo https://www.python.org/downloads/
     echo.
     pause
@@ -26,6 +26,36 @@ if %errorlevel% neq 0 (
 )
 
 python --version
+
+REM Check Python version
+for /f "tokens=2" %%V in ('python --version 2^>^&1') do set "PYTHON_VERSION=%%V"
+
+for /f "tokens=1,2 delims=." %%A in ("%PYTHON_VERSION%") do (
+    set "PYTHON_MAJOR=%%A"
+    set "PYTHON_MINOR=%%B"
+)
+
+if %PYTHON_MAJOR% LSS 3 (
+    goto PYTHON_TOO_OLD
+)
+
+if %PYTHON_MAJOR% EQU 3 if %PYTHON_MINOR% LSS 12 (
+    goto PYTHON_TOO_OLD
+)
+
+echo Python version is supported.
+goto PYTHON_OK
+
+:PYTHON_TOO_OLD
+echo.
+echo ERROR: Python 3.12 or newer is required.
+echo Current version: %PYTHON_VERSION%
+echo.
+echo Please update Python and try again.
+pause
+exit /b 1
+
+:PYTHON_OK
 
 echo.
 echo [2/5] Checking PyInstaller...
