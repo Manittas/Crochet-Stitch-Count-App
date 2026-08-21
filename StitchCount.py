@@ -21,7 +21,7 @@ sys.excepthook = handle_unhandled_exception
 # -----------------
 
 window = Tk()
-window.title("Stich Counter")
+window.title("Stitch Counter")
 window.geometry("300x300")
 window.resizable(False, False)
 window.attributes("-topmost", True)
