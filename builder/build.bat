@@ -10,7 +10,7 @@ echo.
 
 cd /d "%~dp0\.."
 
-echo [1/5] Checking Python...
+echo [1/6] Checking Python...
 
 where python >nul 2>&1
 
@@ -58,7 +58,35 @@ exit /b 1
 :PYTHON_OK
 
 echo.
-echo [2/5] Checking PyInstaller...
+echo [2/6] Checking Vosk...
+echo.
+
+python -m pip show vosk >nul 2>&1
+
+if %errorlevel% neq 0 (
+    echo Vosk was not found.
+    echo Installing Vosk...
+    echo.
+
+    python -m pip install vosk
+
+    if %errorlevel% neq 0 (
+        echo.
+        echo ERROR: Failed to install Vosk.
+        echo.
+        pause
+        exit /b 1
+    )
+
+    echo.
+    echo Vosk installed successfully.
+)
+
+echo Vosk version:
+python -m pip show vosk
+
+echo.
+echo [3/6] Checking PyInstaller...
 
 python -m PyInstaller --version >nul 2>&1
 
@@ -76,12 +104,16 @@ if %errorlevel% neq 0 (
         pause
         exit /b 1
     )
+
+    echo.
+    echo PyInstaller installed successfully.
 )
 
+echo PyInstaller version:
 python -m PyInstaller --version
 
 echo.
-echo [3/5] Validating project...
+echo [4/6] Validating project...
 
 set "REQUIRED_FILES=StitchCount.py assets\Crochet.ico models\Row.py services\AppManager.py services\LogService.py services\StorageService.py ui\CanvasRenderer.py ui\PopupDialog.py utils\Helpers.py"
 
@@ -100,14 +132,14 @@ echo.
 echo All required files were found.
 
 echo.
-echo [4/5] Removing previous build if any exists...
+echo [5/6] Removing previous build if any exists...
 
 if exist "build" rmdir /s /q "build"
 if exist "dist" rmdir /s /q "dist"
 if exist "StitchCount.spec" del /q "StitchCount.spec"
 
 echo.
-echo [5/5] Building application...
+echo [6/6] Building application...
 echo.
 
 python -m PyInstaller ^

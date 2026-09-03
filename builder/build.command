@@ -7,7 +7,7 @@ echo
 
 cd "$(dirname "$0")/.."
 
-echo "[1/5] Checking Python..."
+echo "[1/6] Checking Python..."
 echo
 
 if ! command -v python3 &> /dev/null; then
@@ -43,7 +43,33 @@ fi
 echo "Python version is supported."
 
 echo
-echo "[2/5] Checking PyInstaller..."
+echo "[2/6] Checking Vosk..."
+echo
+
+if ! python3 -m pip show vosk >/dev/null 2>&1; then
+    echo "Vosk was not found."
+    echo "Installing Vosk..."
+    echo
+
+    python3 -m pip install vosk
+
+    if [ $? -ne 0 ]; then
+        echo
+        echo "ERROR: Failed to install Vosk."
+        echo
+        read -p "Press Enter to exit..."
+        exit 1
+    fi
+
+    echo
+    echo "Vosk installed successfully."
+fi
+
+echo "Vosk version:"
+python3 -m pip show vosk
+
+echo
+echo "[3/6] Checking PyInstaller..."
 echo
 
 if ! python3 -m PyInstaller --version &> /dev/null; then
@@ -59,13 +85,16 @@ if ! python3 -m PyInstaller --version &> /dev/null; then
         read -p "Press Enter to exit..."
         exit 1
     fi
+
+    echo
+    echo "PyInstaller installed successfully."
 fi
 
 echo "PyInstaller version:"
 python3 -m PyInstaller --version
 
 echo
-echo "[3/5] Validating project..."
+echo "[4/6] Validating project..."
 echo
 
 REQUIRED_FILES=(
@@ -95,7 +124,7 @@ echo
 echo "All required files were found."
 
 echo
-echo "[4/5] Removing previous build..."
+echo "[5/6] Removing previous build..."
 echo
 
 rm -rf build
@@ -105,7 +134,7 @@ rm -f StitchCount.spec
 echo "Previous build removed."
 
 echo
-echo "[5/5] Building application..."
+echo "[6/6] Building application..."
 echo
 
 python3 -m PyInstaller \
