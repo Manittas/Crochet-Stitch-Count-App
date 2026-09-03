@@ -104,16 +104,18 @@ REQUIRED_FILES=(
     "services/AppManager.py"
     "services/LogService.py"
     "services/StorageService.py"
+    "services/SpeechService.py"
     "ui/CanvasRenderer.py"
     "ui/PopupDialog.py"
-    "utils/Helpers.py"
+    "utils/Helpers.py
+    speech\vosk-model-small-en-us-0.15"
 )
 
 for file in "${REQUIRED_FILES[@]}"; do
     echo "Checking $file..."
 
     if [ ! -f "$file" ]; then
-        echo "ERROR: Required file not found: $file"
+        echo "ERROR: Required file or folder not found: $file"
         echo
         read -p "Press Enter to exit..."
         exit 1
@@ -142,6 +144,7 @@ python3 -m PyInstaller \
     --onefile \
     --windowed \
     --icon "assets/Crochet.icns" \
+    --add-data "speech/vosk-model-small-en-us-0.15:speech/vosk-model-small-en-us-0.15" \
     "StitchCount.py"
 
 if [ $? -ne 0 ]; then

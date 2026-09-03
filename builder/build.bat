@@ -115,13 +115,13 @@ python -m PyInstaller --version
 echo.
 echo [4/6] Validating project...
 
-set "REQUIRED_FILES=StitchCount.py assets\Crochet.ico models\Row.py services\AppManager.py services\LogService.py services\StorageService.py ui\CanvasRenderer.py ui\PopupDialog.py utils\Helpers.py"
+set "REQUIRED_FILES=StitchCount.py assets\Crochet.ico models\Row.py services\AppManager.py services\LogService.py services\StorageService.py services\SpeechService.py ui\CanvasRenderer.py ui\PopupDialog.py utils\Helpers.py speech\vosk-model-small-en-us-0.15"
 
 for %%F in (%REQUIRED_FILES%) do (
     echo Checking %%F...
 
     if not exist "%%F" (
-        echo ERROR: Required file not found: %%F
+        echo ERROR: Required file or folder not found: %%F
         echo.
         pause
         exit /b 1
@@ -147,6 +147,7 @@ python -m PyInstaller ^
     --onefile ^
     --noconsole ^
     --icon "assets\Crochet.ico" ^
+    --add-data "speech\vosk-model-small-en-us-0.15;speech\vosk-model-small-en-us-0.15" ^
     "StitchCount.py"
 
 if %errorlevel% neq 0 (
