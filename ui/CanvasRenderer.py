@@ -54,7 +54,7 @@ class CanvasRenderer:
     
     # -------------------------------------------------
     
-    def first_render_buttons(self, incrementBtn, manualSetBtn, decrementBtn, saveBtn, newBtn, menuBtn):
+    def first_render_buttons(self, incrementBtn, manualSetBtn, decrementBtn, saveBtn, newBtn, menuBtn, voiceBtn):
         self.canvas.create_window(200,
                              175,
                              window=incrementBtn)
@@ -73,6 +73,9 @@ class CanvasRenderer:
         self.canvas.create_window(275,
                              25,
                              window=menuBtn)
+        self.canvas.create_window(275,
+                             60,
+                             window=voiceBtn)
     
     # -------------------------------------------------
     

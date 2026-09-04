@@ -154,6 +154,7 @@ manualSetBtn = None
 saveBtn = None
 newBtn = None
 menuBtn = None
+voiceBtn = None
 inputField = None
 
 # Initialize variables and services
@@ -186,10 +187,11 @@ manualSetBtn = Button(window, text="Set", font=btn_font, width=4, height=1, comm
 saveBtn = Button(window, text="Save", font=btn_font, width=4, height=1, command=save)
 newBtn = Button(window, text="New", font=btn_font, width=4, height=1, command=open_new_row_popup)
 menuBtn = Button(window, text="☰", font=btn_font, command=lambda: popupService.choose_row_popup(manager, decrementBtn))
+voiceBtn = Button(window, text="🎙", font=btn_font, command=open_new_row_popup)
 
 inputField = Entry(window, validate="key", validatecommand=(validate_cmd, "%P"))
 
-renderer.first_render_buttons(incrementBtn, manualSetBtn, decrementBtn, saveBtn, newBtn, menuBtn)
+renderer.first_render_buttons(incrementBtn, manualSetBtn, decrementBtn, saveBtn, newBtn, menuBtn, voiceBtn)
 
 # App bindings and main loop
 # --------------------------
