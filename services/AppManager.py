@@ -98,4 +98,4 @@ class AppManager:
  
     def toggle_microphone(self, voiceBtn):
         self.micOn = not self.micOn
-        self.renderer.renderVoiceButton(voiceBtn)
+        self.renderer.renderVoiceButton(voiceBtn, self.micOn)
