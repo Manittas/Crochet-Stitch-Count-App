@@ -187,7 +187,7 @@ manualSetBtn = Button(window, text="Set", font=btn_font, width=4, height=1, comm
 saveBtn = Button(window, text="Save", font=btn_font, width=4, height=1, command=save)
 newBtn = Button(window, text="New", font=btn_font, width=4, height=1, command=open_new_row_popup)
 menuBtn = Button(window, text="☰", font=btn_font, command=lambda: popupService.choose_row_popup(manager, decrementBtn))
-voiceBtn = Button(window, text="🎙", font=btn_font, command=open_new_row_popup)
+voiceBtn = Button(window, text="🎙", font=btn_font, command=lambda: manager.toggle_microphone(voiceBtn))
 
 inputField = Entry(window, validate="key", validatecommand=(validate_cmd, "%P"))
 

@@ -76,6 +76,9 @@ class CanvasRenderer:
         self.canvas.create_window(275,
                              60,
                              window=voiceBtn)
+
+    def renderVoiceButton(self, voiceBtn):
+        
     
     # -------------------------------------------------
     

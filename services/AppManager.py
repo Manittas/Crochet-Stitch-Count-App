@@ -8,7 +8,9 @@ class AppManager:
         self.renderer = _renderer
         # flags
         self.inputVisible = False  # toggles the input field to be visible
-        self.inputWindow = None    # default store value for canvas window ID
+        self.micOn = False
+        # default store value for canvas window ID
+        self.inputWindow = None
         # objects
         self.currentIndex = 0
         self.rowsList = []
@@ -94,3 +96,6 @@ class AppManager:
             self.update_row_renderers(self.currentIndex, decrementBtn)
         return False
  
+    def toggle_microphone(self, voiceBtn):
+        self.micOn = not self.micOn
+        self.renderer.renderVoiceButton(voiceBtn)
