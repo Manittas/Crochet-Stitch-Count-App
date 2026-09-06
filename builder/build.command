@@ -170,6 +170,7 @@ python3 -m PyInstaller \
     --onefile \
     --windowed \
     --icon "assets/Crochet.icns" \
+    --collect-all vosk \
     --add-data "speech/vosk-model-small-en-us-0.15:speech/vosk-model-small-en-us-0.15" \
     "StitchCount.py"
 

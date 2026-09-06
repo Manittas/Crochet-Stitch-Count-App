@@ -172,6 +172,7 @@ python -m PyInstaller ^
     --onefile ^
     --noconsole ^
     --icon "assets\Crochet.ico" ^
+    --collect-all vosk ^
     --add-data "speech\vosk-model-small-en-us-0.15;speech\vosk-model-small-en-us-0.15" ^
     "StitchCount.py"
 
