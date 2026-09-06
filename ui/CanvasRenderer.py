@@ -77,11 +77,8 @@ class CanvasRenderer:
                              60,
                              window=voiceBtn)
 
-    def renderVoiceButton(self, voiceBtn, micOn):
-        if micOn:
-            voiceBtn.config(fg="red")
-        else:
-            voiceBtn.config(fg="black")
+    def renderVoiceButton(self, voiceBtn, color):
+        voiceBtn.config(fg=color)
     
     # -------------------------------------------------
     

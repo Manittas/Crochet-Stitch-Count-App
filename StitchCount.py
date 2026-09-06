@@ -2,6 +2,7 @@ from tkinter import Tk, Button, Entry, font, END
 from services.AppManager import AppManager
 from services.LogService import LogService
 from services.StorageService import StorageService
+from services.SpeechService import SpeechService
 from ui.CanvasRenderer import CanvasRenderer
 from ui.PopupDialog import PopupDialog
 from utils.Helpers import IsNumber
@@ -161,7 +162,8 @@ inputField = None
 # ---------------------------------
 
 storageService = StorageService(logger, window)
-manager = AppManager(storageService, renderer)
+speechService = SpeechService()
+manager = AppManager(storageService, renderer, speechService)
 popupService = PopupDialog(window)
 
 if not manager.has_rows():
@@ -187,7 +189,7 @@ manualSetBtn = Button(window, text="Set", font=btn_font, width=4, height=1, comm
 saveBtn = Button(window, text="Save", font=btn_font, width=4, height=1, command=save)
 newBtn = Button(window, text="New", font=btn_font, width=4, height=1, command=open_new_row_popup)
 menuBtn = Button(window, text="☰", font=btn_font, command=lambda: popupService.choose_row_popup(manager, decrementBtn))
-voiceBtn = Button(window, text="🎙", font=btn_font, command=lambda: manager.toggle_microphone(voiceBtn))
+voiceBtn = Button(window, text="🎙", font=btn_font, command=lambda: manager.toggle_microphone(voiceBtn, update_count))
 
 inputField = Entry(window, validate="key", validatecommand=(validate_cmd, "%P"))
 

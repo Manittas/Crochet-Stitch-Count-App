@@ -3,9 +3,10 @@ from models.Row import Row
 import re
 
 class AppManager:
-    def __init__(self, _storageService, _renderer):
+    def __init__(self, _storageService, _renderer, _speechService):
         self.storageService = _storageService
         self.renderer = _renderer
+        self.speechService = _speechService
         # flags
         self.inputVisible = False  # toggles the input field to be visible
         self.micOn = False
@@ -96,6 +97,17 @@ class AppManager:
             self.update_row_renderers(self.currentIndex, decrementBtn)
         return False
  
-    def toggle_microphone(self, voiceBtn):
+    def toggle_microphone(self, voiceBtn, update_count):
         self.micOn = not self.micOn
-        self.renderer.renderVoiceButton(voiceBtn, self.micOn)
+        if self.micOn:
+            self.renderer.renderVoiceButton(voiceBtn, "red")
+            self.speechService.start(lambda number: self.handle_voice_input(number, update_count))
+        else:
+            self.renderer.renderVoiceButton(voiceBtn, "black")
+            self.speechService.stop()
+
+    def handle_voice_input(self, number, update_count):
+        # verification so it only changes if recognizable value
+        if number >= 0:
+            self.rowsList[self.currentIndex].count = int(number)
+            update_count()
