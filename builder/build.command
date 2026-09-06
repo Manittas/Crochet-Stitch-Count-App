@@ -7,7 +7,7 @@ echo
 
 cd "$(dirname "$0")/.."
 
-echo "[1/6] Checking Python..."
+echo "[1/7] Checking Python..."
 echo
 
 if ! command -v python3 &> /dev/null; then
@@ -43,7 +43,7 @@ fi
 echo "Python version is supported."
 
 echo
-echo "[2/6] Checking Vosk..."
+echo "[2/7] Checking Vosk..."
 echo
 
 if ! python3 -m pip show vosk >/dev/null 2>&1; then
@@ -69,7 +69,33 @@ echo "Vosk version:"
 python3 -m pip show vosk
 
 echo
-echo "[3/6] Checking PyInstaller..."
+echo "[3/7] Checking sounddevice..."
+echo
+
+if ! python3 -m pip show sounddevice >/dev/null 2>&1; then
+    echo "sounddevice was not found."
+    echo "Installing sounddevice..."
+    echo
+
+    python3 -m pip install sounddevice
+
+    if [ $? -ne 0 ]; then
+        echo
+        echo "ERROR: Failed to install sounddevice."
+        echo
+        read -p "Press Enter to exit..."
+        exit 1
+    fi
+
+    echo
+    echo "sounddevice installed successfully."
+fi
+
+echo "sounddevice version:"
+python3 -m pip show sounddevice
+
+echo
+echo "[4/7] Checking PyInstaller..."
 echo
 
 if ! python3 -m PyInstaller --version &> /dev/null; then
@@ -94,7 +120,7 @@ echo "PyInstaller version:"
 python3 -m PyInstaller --version
 
 echo
-echo "[4/6] Validating project..."
+echo "[5/7] Validating project..."
 echo
 
 REQUIRED_FILES=(
@@ -126,7 +152,7 @@ echo
 echo "All required files were found."
 
 echo
-echo "[5/6] Removing previous build..."
+echo "[6/7] Removing previous build..."
 echo
 
 rm -rf build
@@ -136,7 +162,7 @@ rm -f StitchCount.spec
 echo "Previous build removed."
 
 echo
-echo "[6/6] Building application..."
+echo "[7/7] Building application..."
 echo
 
 python3 -m PyInstaller \

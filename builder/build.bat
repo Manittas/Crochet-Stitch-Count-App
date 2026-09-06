@@ -10,7 +10,7 @@ echo.
 
 cd /d "%~dp0\.."
 
-echo [1/6] Checking Python...
+echo [1/7] Checking Python...
 
 where python >nul 2>&1
 
@@ -58,7 +58,7 @@ exit /b 1
 :PYTHON_OK
 
 echo.
-echo [2/6] Checking Vosk...
+echo [2/7] Checking Vosk...
 echo.
 
 python -m pip show vosk >nul 2>&1
@@ -86,7 +86,32 @@ echo Vosk version:
 python -m pip show vosk
 
 echo.
-echo [3/6] Checking PyInstaller...
+echo [3/7] Checking sounddevice...
+
+python -m pip show sounddevice >nul 2>&1
+
+if %errorlevel% neq 0 (
+    echo sounddevice was not found.
+    echo Installing sounddevice...
+    echo.
+
+    python -m pip install sounddevice
+
+    if %errorlevel% neq 0 (
+        echo ERROR: Failed to install sounddevice.
+        pause
+        exit /b 1
+    )
+
+    echo.
+    echo sounddevice installed successfully.
+)
+
+echo sounddevice version:
+python -m pip show sounddevice
+
+echo.
+echo [4/7] Checking PyInstaller...
 
 python -m PyInstaller --version >nul 2>&1
 
@@ -113,7 +138,7 @@ echo PyInstaller version:
 python -m PyInstaller --version
 
 echo.
-echo [4/6] Validating project...
+echo [5/7] Validating project...
 
 set "REQUIRED_FILES=StitchCount.py assets\Crochet.ico models\Row.py services\AppManager.py services\LogService.py services\StorageService.py services\SpeechService.py ui\CanvasRenderer.py ui\PopupDialog.py utils\Helpers.py speech\vosk-model-small-en-us-0.15"
 
@@ -132,14 +157,14 @@ echo.
 echo All required files were found.
 
 echo.
-echo [5/6] Removing previous build if any exists...
+echo [6/7] Removing previous build if any exists...
 
 if exist "build" rmdir /s /q "build"
 if exist "dist" rmdir /s /q "dist"
 if exist "StitchCount.spec" del /q "StitchCount.spec"
 
 echo.
-echo [6/6] Building application...
+echo [7/7] Building application...
 echo.
 
 python -m PyInstaller ^
