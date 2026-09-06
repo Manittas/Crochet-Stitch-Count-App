@@ -44,14 +44,14 @@ class SpeechService:
 
     def listen(self):
         def audio_callback(indata, frames, time, status):
-            if self.recognizer.AcceptWaveform(indata):
-                result = json.loads(
-                    self.recognizer.Result()
-                )
+            data = bytes(indata)
+            # translates audio data into native C API, into JSON into getting the text
+            if self.recognizer.AcceptWaveform(data):
+                result = json.loads(self.recognizer.Result())
                 text = result.get("text", "")
                 if text:
                     if self.callback:
-                        number = text_to_number(text)
+                        number = self.text_to_number(text)
                         self.callback(number)
         self.stream = sd.RawInputStream(
             samplerate=16000,
